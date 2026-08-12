@@ -1,3 +1,8 @@
+// Register ChartDataLabels plugin for Chart.js
+if (typeof ChartDataLabels !== 'undefined') {
+  Chart.register(ChartDataLabels);
+}
+
 let comparisonChart = null;
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -17,20 +22,15 @@ async function fetchAndRenderDashboard() {
   if (loadingEl) loadingEl.style.display = 'flex';
 
   try {
-    // 1. Fetch Part A: Executive KPI Summary
     const kpiPromise = fetch(`/api/kpi?borough=${borough}&year=${year}`).then(res => res.json());
-
-    // 2. Fetch Comparative Chart Data
     const chartPromise = fetch(`/api/collisions/comparison?borough=${borough}&year=${year}`).then(res => res.json());
 
     const [kpiResult, chartResult] = await Promise.all([kpiPromise, chartPromise]);
 
-    // Render Part A
     if (kpiResult.success) {
       renderKPICards(kpiResult.kpi);
     }
 
-    // Render Chart
     if (chartResult.success) {
       renderChart(chartResult.metrics, borough, year);
     }
@@ -42,26 +42,29 @@ async function fetchAndRenderDashboard() {
   }
 }
 
-// PART A: Executive KPI Renderer
 function renderKPICards(kpi) {
   document.getElementById('kpi-volume').textContent = kpi.total_volume.toLocaleString();
   document.getElementById('kpi-top-cause').textContent = kpi.leading_cause;
   document.getElementById('kpi-top-count').textContent = `${kpi.leading_cause_count.toLocaleString()} incidents`;
   document.getElementById('kpi-share').textContent = `${kpi.primary_cause_share}%`;
 
-  // Dynamically update the insight banner number
   const inattentionEl = document.getElementById('inattention-count-text');
   if (inattentionEl && kpi.infrastructure_count !== undefined) {
     inattentionEl.textContent = `${kpi.infrastructure_count.toLocaleString()}+`;
   }
 }
 
-// Chart Renderer
 function renderChart(metrics, borough, year) {
   const ctx = document.getElementById('comparisonChart').getContext('2d');
 
   if (comparisonChart) {
     comparisonChart.destroy();
+  }
+
+  // Update Allocation Ratio KPI Badge
+  const ratioEl = document.getElementById('kpi-ratio');
+  if (ratioEl && metrics.allocation_ratio !== undefined) {
+    ratioEl.textContent = `${metrics.allocation_ratio}x`;
   }
 
   const boroughLabel = borough === 'ALL' ? 'All NYC Boroughs' : borough;
@@ -86,6 +89,9 @@ function renderChart(metrics, borough, year) {
     options: {
       responsive: true,
       maintainAspectRatio: true,
+      layout: {
+        padding: { top: 25 }
+      },
       plugins: {
         title: {
           display: true,
@@ -94,7 +100,16 @@ function renderChart(metrics, borough, year) {
           font: { size: 15, weight: '600' },
           padding: { bottom: 20 }
         },
-        legend: { labels: { color: '#cbd5e1' } },
+        legend: { display: false },
+        datalabels: {
+          anchor: 'end',
+          align: 'top',
+          color: '#f8fafc',
+          font: { weight: 'bold', size: 12 },
+          formatter: function(value) {
+            return value.toLocaleString() + ' crashes';
+          }
+        },
         tooltip: {
           callbacks: {
             label: function(context) {
