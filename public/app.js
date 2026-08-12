@@ -5,7 +5,20 @@ if (typeof ChartDataLabels !== 'undefined') {
 let heroChart = null;
 let budgetChart = null;
 
+let mapInstance = null;
+let mapMarkersLayer = null;
+
+const BOROUGH_CENTERS = {
+  'ALL': [40.7128, -74.0060, 11],
+  'MANHATTAN': [40.7831, -73.9712, 12],
+  'BROOKLYN': [40.6501, -73.9495, 11],
+  'QUEENS': [40.7282, -73.7949, 11],
+  'BRONX': [40.8448, -73.8648, 12],
+  'STATEN ISLAND': [40.5795, -74.1502, 11]
+};
+
 document.addEventListener('DOMContentLoaded', () => {
+  initMapIfNeeded();
   fetchAndRenderDashboard();
 
   const updateBtn = document.getElementById('update-btn');
@@ -21,8 +34,9 @@ async function fetchAndRenderDashboard() {
   try {
     const kpiPromise = fetch(`/api/kpi?borough=${borough}&year=${year}`).then(res => res.json());
     const chartPromise = fetch(`/api/collisions/comparison?borough=${borough}&year=${year}`).then(res => res.json());
+    const mapPromise = fetch(`/api/map?borough=${borough}&year=${year}`).then(res => res.json());
 
-    const [kpiResult, chartResult] = await Promise.all([kpiPromise, chartPromise]);
+    const [kpiResult, chartResult, mapResult] = await Promise.all([kpiPromise, chartPromise, mapPromise]);
 
     if (kpiResult.success) {
       updateInsightSection(kpiResult.kpi);
@@ -31,6 +45,10 @@ async function fetchAndRenderDashboard() {
     if (chartResult.success) {
       renderHeroChart(chartResult.metrics);
       renderBudgetChart(chartResult.metrics);
+    }
+
+    if (mapResult.success) {
+      renderMapPoints(mapResult.points, borough);
     }
 
   } catch (error) {
@@ -132,5 +150,46 @@ function renderBudgetChart(metrics) {
         }
       }
     }
+  });
+}
+
+function initMapIfNeeded() {
+  if (!mapInstance && typeof L !== 'undefined') {
+    mapInstance = L.map('mapView').setView([40.7128, -74.0060], 11);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      attribution: '© OpenStreetMap'
+    }).addTo(mapInstance);
+
+    mapMarkersLayer = L.layerGroup().addTo(mapInstance);
+  }
+}
+
+function renderMapPoints(points, borough) {
+  if (!mapInstance || !mapMarkersLayer) return;
+
+  mapMarkersLayer.clearLayers();
+
+  const centerConfig = BOROUGH_CENTERS[borough.toUpperCase()] || BOROUGH_CENTERS['ALL'];
+  mapInstance.setView([centerConfig[0], centerConfig[1]], centerConfig[2]);
+
+  points.forEach(pt => {
+    const circle = L.circleMarker([pt.lat, pt.lng], {
+      radius: 5,
+      fillColor: '#ef4444',
+      color: '#b91c1c',
+      weight: 1,
+      opacity: 0.8,
+      fillOpacity: 0.6
+    });
+
+    circle.bindPopup(`
+      <div style="font-size: 0.85rem; font-family: sans-serif; color: #0f172a;">
+        <strong>Factor:</strong> ${pt.factor}<br/>
+        <strong>Date:</strong> ${pt.date}
+      </div>
+    `);
+
+    mapMarkersLayer.addLayer(circle);
   });
 }

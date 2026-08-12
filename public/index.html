@@ -5,12 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NYC Vision Zero | Street Design Advocacy</title>
 
-  <!-- Google Fonts & Chart.js -->
+  <!-- Google Fonts, Chart.js & Leaflet Map CDN -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <style>
     * {
@@ -82,7 +84,7 @@
       border-bottom: 2px solid #38bdf8;
     }
 
-    /* Top Hero Section (Dark Theme) */
+    /* Hero Section (Dark Theme) */
     .hero-section {
       padding: 2.5rem 2rem;
       display: grid;
@@ -136,7 +138,7 @@
       color: #1a232a;
     }
 
-    /* Filter Controls Bar (Subtle Integration) */
+    /* Filter Strip */
     .filter-strip {
       background: #182026;
       padding: 0.75rem 2rem;
@@ -191,7 +193,6 @@
       padding-bottom: 0.5rem;
     }
 
-    /* Part 1: The Insight */
     .insight-stat {
       display: flex;
       align-items: center;
@@ -232,7 +233,6 @@
       color: #475569;
     }
 
-    /* Part 2: Before vs After Concept */
     .redesign-visual {
       background: #f8fafc;
       border: 1px solid #e2e8f0;
@@ -285,9 +285,28 @@
       left: 70%;
     }
 
-    /* Part 3: Budget Reallocation Chart */
     .budget-chart-container {
       height: 180px;
+    }
+
+    /* Option A: Full Width Map Section */
+    .map-section {
+      background: #182026;
+      padding: 2rem;
+      border-top: 1px solid #2e3a46;
+    }
+
+    .map-section .col-title {
+      color: #ffffff;
+      border-bottom-color: #2e3a46;
+      margin-bottom: 1rem;
+    }
+
+    #mapView {
+      height: 380px;
+      width: 100%;
+      border-radius: 6px;
+      z-index: 1;
     }
 
     /* Footer */
@@ -404,6 +423,12 @@
           <canvas id="budgetChart"></canvas>
         </div>
       </div>
+    </section>
+
+    <!-- Option A: Spatial Heatmap Section -->
+    <section class="map-section">
+      <div class="col-title">Spatial Incident Clusters (The "Moment" Engine)</div>
+      <div id="mapView"></div>
     </section>
 
     <!-- Footer -->
