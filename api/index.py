@@ -1,8 +1,8 @@
 import os
 import requests
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, jsonify, request
 
-app = Flask(__name__, static_folder=".", static_url_path="")
+app = Flask(__name__)
 
 NYC_DATA_API_URL = "https://data.cityofnewyork.us/resource/h9gi-nx95.json"
 
@@ -15,11 +15,6 @@ def add_cors_headers(response):
     return response
 
 
-@app.route("/")
-def serve_index():
-    return send_from_directory(".", "index.html")
-
-
 def build_date_where_clause(year):
     """Builds SoQL date query filter for a specific year or all available historical years."""
     if not year or year.upper() == "ALL":
@@ -27,12 +22,15 @@ def build_date_where_clause(year):
     return f"crash_date >= '{year}-01-01T00:00:00' AND crash_date <= '{year}-12-31T23:59:59'"
 
 
-@app.route("/api/collisions/comparison", methods=["GET"])
+@app.route("/api/collisions/comparison", methods=["GET", "OPTIONS"])
 def get_collision_comparison():
+    # Handle pre-flight CORS requests gracefully
+    if request.method == "OPTIONS":
+        return jsonify({"success": True}), 200
+
     borough = request.args.get("borough", "ALL").upper()
     year = request.args.get("year", "2025")
 
-    # Build date query clause dynamically
     date_filter = build_date_where_clause(year)
     where_clause = date_filter
 
@@ -55,10 +53,10 @@ def get_collision_comparison():
                 jsonify(
                     {
                         "success": False,
-                        "error": f"NYC Open Data API returned status code {response.status_code}",
+                        "error": f"NYC Open Data API status code {response.status_code}",
                     }
                 ),
-                500,
+                200,
             )
 
         data = response.json()
@@ -67,9 +65,7 @@ def get_collision_comparison():
         enforcement_count = 0
 
         for record in data:
-            factor = record.get(
-                "contributing_factor_vehicle_1", ""
-            ).upper()
+            factor = record.get("contributing_factor_vehicle_1", "").upper()
 
             # Infrastructure-Bound: Cognitive distraction / inattention
             if "DRIVER INATTENTION" in factor or "DISTRACTION" in factor:
@@ -95,9 +91,8 @@ def get_collision_comparison():
         )
 
     except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 500
+        return jsonify({"success": False, "error": str(e)}), 200
 
 
-# Serverless entry point handler for Vercel / local testing
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
