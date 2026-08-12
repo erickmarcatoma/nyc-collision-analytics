@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NYC Vision Zero | Street Design Advocacy</title>
+  <title>NYC Vision Zero | All-Road-User Capital Allocation</title>
 
   <!-- Google Fonts, Chart.js & Leaflet Map CDN -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -50,7 +50,7 @@
 
     .logo-text {
       font-family: 'Oswald', sans-serif;
-      font-size: 1.3rem;
+      font-size: 1.25rem;
       font-weight: 700;
       letter-spacing: 0.05em;
       color: #ffffff;
@@ -59,7 +59,7 @@
 
     .logo-text span {
       font-weight: 400;
-      color: #94a3b8;
+      color: #38bdf8;
     }
 
     .nav-links {
@@ -103,9 +103,31 @@
       padding-left: 1rem;
     }
 
+    /* All Road User Pill Badges */
+    .user-badges {
+      display: flex;
+      gap: 0.6rem;
+      margin-bottom: 0.85rem;
+      flex-wrap: wrap;
+    }
+
+    .user-badge {
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.25rem 0.6rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .badge-ped { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
+    .badge-cyc { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .badge-drv { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3); }
+
     .hero-text h1 {
       font-family: 'Oswald', sans-serif;
-      font-size: 2.5rem;
+      font-size: 2.3rem;
       line-height: 1.1;
       font-weight: 700;
       text-transform: uppercase;
@@ -289,7 +311,7 @@
       height: 180px;
     }
 
-    /* Option A: Full Width Map Section */
+    /* Spatial Heatmap Section */
     .map-section {
       background: #182026;
       padding: 2rem;
@@ -327,7 +349,7 @@
   <div class="wrapper">
     <!-- Top Navigation -->
     <nav>
-      <div class="logo-text">NYC VISION ZERO <span>| STREET DESIGN ADVOCACY</span></div>
+      <div class="logo-text">NYC VISION ZERO <span>| ALL-ROAD-USER CAPITAL ALLOCATION</span></div>
       <ul class="nav-links">
         <li><a href="#" class="active">Data</a></li>
         <li><a href="#">Solutions</a></li>
@@ -363,13 +385,18 @@
       </div>
     </div>
 
-    <!-- Hero Section (Comparison Engine) -->
+    <!-- Hero Section -->
     <section class="hero-section">
       <div class="hero-chart-container">
         <canvas id="heroChart"></canvas>
       </div>
 
       <div class="hero-text">
+        <div class="user-badges">
+          <span class="user-badge badge-ped">🚸 Pedestrians</span>
+          <span class="user-badge badge-cyc">🚲 Cyclists</span>
+          <span class="user-badge badge-drv">🚘 Drivers</span>
+        </div>
         <h1><span>The Data is Clear:</span><br>Inattention is Our Biggest Traffic Threat</h1>
         <button class="btn-explore" id="update-btn">Explore The Data</button>
       </div>
@@ -381,14 +408,14 @@
       <div class="showcase-col">
         <div class="col-title">The Insight</div>
         <div class="insight-stat">
-          <div class="insight-icon">🚗</div>
+          <div class="insight-icon">🚸</div>
           <div>
             <div class="stat-number" id="kpi-inattention">24,000+</div>
             <div class="stat-label">Annual Collisions</div>
           </div>
         </div>
         <p class="insight-text">
-          The Data is Clear: driver inattention is our biggest traffic threat. Annual collisions caused by distraction dwarf alcohol and cell phone offenses combined, proving that traffic safety requires concrete street redesigns over police enforcement alone.
+          Driver inattention is the single leading threat across all road users—pedestrians, cyclists, and drivers alike. Annual crashes caused by cognitive distraction dwarf moving violations, proving that street safety requires physical redesigns over enforcement alone.
         </p>
       </div>
 
@@ -399,11 +426,11 @@
           <div class="before-after-box">
             <div class="road-pane">
               <strong>Before</strong>
-              <span>Wide Multi-Lane</span>
+              <span>Wide Multi-Lane Road</span>
             </div>
             <div class="road-pane after">
               <strong>After</strong>
-              <span>Protected Bike Lane & Median</span>
+              <span>Protected Lanes & Medians</span>
             </div>
           </div>
           <div class="slider-graphic">
@@ -411,7 +438,7 @@
           </div>
           <div style="display:flex; justify-content:space-between; font-size:0.75rem; font-weight:700;">
             <span style="color:#ef4444;">24,000+ INATTENTION</span>
-            <span style="color:#10b981;">SAFETY TARGET</span>
+            <span style="color:#10b981;">ALL-USER SAFETY TARGET</span>
           </div>
         </div>
       </div>
@@ -425,7 +452,7 @@
       </div>
     </section>
 
-    <!-- Option A: Spatial Heatmap Section -->
+    <!-- Spatial Heatmap Section -->
     <section class="map-section">
       <div class="col-title">Spatial Incident Clusters (The "Moment" Engine)</div>
       <div id="mapView"></div>
@@ -433,7 +460,7 @@
 
     <!-- Footer -->
     <footer>
-      <div>NYC Vision Zero Street Design Advocacy</div>
+      <div>NYC Vision Zero All-Road-User Advocacy</div>
       <div>@NYC_VISIONZERO</div>
     </footer>
   </div>

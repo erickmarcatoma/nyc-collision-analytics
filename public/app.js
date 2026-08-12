@@ -174,18 +174,24 @@ function renderMapPoints(points, borough) {
   mapInstance.setView([centerConfig[0], centerConfig[1]], centerConfig[2]);
 
   points.forEach(pt => {
+    // Choose pin color based on road user impact
+    let color = '#ef4444';
+    if (pt.user_type.includes('Pedestrian')) color = '#38bdf8';
+    else if (pt.user_type.includes('Cyclist')) color = '#10b981';
+
     const circle = L.circleMarker([pt.lat, pt.lng], {
       radius: 5,
-      fillColor: '#ef4444',
-      color: '#b91c1c',
+      fillColor: color,
+      color: '#000000',
       weight: 1,
       opacity: 0.8,
-      fillOpacity: 0.6
+      fillOpacity: 0.7
     });
 
     circle.bindPopup(`
-      <div style="font-size: 0.85rem; font-family: sans-serif; color: #0f172a;">
-        <strong>Factor:</strong> ${pt.factor}<br/>
+      <div style="font-size: 0.85rem; font-family: sans-serif; color: #0f172a; line-height: 1.4;">
+        <strong>Impact:</strong> ${pt.user_type}<br/>
+        <strong>Root Cause:</strong> ${pt.factor}<br/>
         <strong>Date:</strong> ${pt.date}
       </div>
     `);
