@@ -57,9 +57,18 @@ async function fetchAndRenderDashboard() {
 }
 
 function updateInsightSection(kpi) {
+  const formattedCount = kpi.infrastructure_count ? kpi.infrastructure_count.toLocaleString() : '0';
+
+  // 1. Update Col 1 Big Number
   const inattentionEl = document.getElementById('kpi-inattention');
-  if (inattentionEl && kpi.infrastructure_count !== undefined) {
-    inattentionEl.textContent = `${kpi.infrastructure_count.toLocaleString()}+`;
+  if (inattentionEl) {
+    inattentionEl.textContent = `${formattedCount}+`;
+  }
+
+  // 2. Dynamic Fix: Sync Col 2 Slider Text directly with Col 1 live filter data!
+  const sliderTextEl = document.getElementById('slider-inattention-text');
+  if (sliderTextEl) {
+    sliderTextEl.textContent = `${formattedCount}+ INATTENTION`;
   }
 }
 
@@ -82,6 +91,9 @@ function renderHeroChart(metrics) {
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      layout: {
+        padding: { top: 30 }
+      },
       plugins: {
         legend: { display: false },
         datalabels: {
@@ -127,13 +139,17 @@ function renderBudgetChart(metrics) {
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      layout: {
+        padding: { top: 25 }
+      },
       plugins: {
         legend: { display: false },
         datalabels: {
+          display: true,
           anchor: 'end',
           align: 'top',
           color: '#0f172a',
-          font: { family: 'Oswald', size: 11, weight: 'bold' },
+          font: { family: 'Oswald', size: 12, weight: 'bold' },
           formatter: function(value) {
             return value.toLocaleString();
           }

@@ -325,6 +325,7 @@
 
     .budget-chart-container {
       height: 180px;
+      position: relative;
     }
 
     /* Spatial Heatmap Section */
@@ -374,7 +375,7 @@
       </ul>
     </nav>
 
-    <!-- Filter Strip with Recommended Year Window -->
+    <!-- Filter Strip -->
     <div class="filter-strip">
       <div>
         <label for="borough-select">Borough:</label>
@@ -391,7 +392,6 @@
       <div>
         <label for="year-select">Year Window:</label>
         <select id="year-select">
-          <option value="ALL">All Available Years (2012–Present)</option>
           <option value="2026">2026 (YTD)</option>
           <option value="2025" selected>2025 (Full Year Baseline)</option>
           <option value="2024">2024</option>
@@ -462,7 +462,7 @@
             <div class="slider-handle"></div>
           </div>
           <div style="display:flex; justify-content:space-between; font-size:0.75rem; font-weight:700;">
-            <span style="color:#ef4444;">24,000+ INATTENTION</span>
+            <span id="slider-inattention-text" style="color:#ef4444;">24,000+ INATTENTION</span>
             <span style="color:#10b981;">ALL-USER SAFETY TARGET</span>
           </div>
         </div>
