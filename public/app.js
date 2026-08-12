@@ -26,7 +26,6 @@ document.addEventListener('DOMContentLoaded', () => {
     updateBtn.addEventListener('click', fetchAndRenderDashboard);
   }
 
-  // AUTO-UPDATE: Re-fetch whenever Borough or Year dropdown selection changes
   const boroughSelect = document.getElementById('borough-select');
   const yearSelect = document.getElementById('year-select');
 
@@ -75,13 +74,11 @@ async function fetchAndRenderDashboard() {
 function updateInsightSection(kpi) {
   const formattedCount = kpi.infrastructure_count ? kpi.infrastructure_count.toLocaleString() : '0';
 
-  // 1. Update Col 1 Big Number
   const inattentionEl = document.getElementById('kpi-inattention');
   if (inattentionEl) {
     inattentionEl.textContent = `${formattedCount}+`;
   }
 
-  // 2. Update Col 2 Red text under the slider
   const sliderTextEl = document.getElementById('slider-inattention-text');
   if (sliderTextEl) {
     sliderTextEl.textContent = `${formattedCount}+ INATTENTION`;
@@ -103,7 +100,7 @@ function renderHeroChart(metrics) {
     data: {
       labels: ['DRIVER INATTENTION', 'ALCOHOL + PHONE USE'],
       datasets: [
-        // Dataset 0: Driver Inattention (Red Bar - Left Stack)
+        // Dataset 0: Driver Inattention (Red Bar - Left)
         {
           label: 'Inattention',
           data: [metrics.infrastructure_bound, 0],
@@ -112,16 +109,16 @@ function renderHeroChart(metrics) {
           barThickness: 65,
           stack: 'stack1'
         },
-        // Dataset 1: Cell Phone Use (Cyan Segment - Bottom Right Stack)
+        // Dataset 1: Cell Phone Use (Cyan Segment - Bottom Right)
         {
           label: 'Cell Phone Use',
           data: [0, metrics.phone_count || 0],
           backgroundColor: '#38bdf8',
-          borderRadius: 0,
+          borderRadius: 4,
           barThickness: 65,
           stack: 'stack1'
         },
-        // Dataset 2: Alcohol Involvement (Purple Segment - Top Right Stack)
+        // Dataset 2: Alcohol Involvement (Purple Segment - Top Right)
         {
           label: 'Alcohol Involvement',
           data: [0, metrics.alcohol_count || 0],
@@ -136,7 +133,8 @@ function renderHeroChart(metrics) {
       responsive: true,
       maintainAspectRatio: false,
       layout: {
-        padding: { top: 55, bottom: 10 }
+        // INCREASED TOP PADDING TO PREVENT TEXT CLIPPING AT THE TOP EDGE
+        padding: { top: 65, bottom: 10 }
       },
       plugins: {
         legend: { display: false },
@@ -151,7 +149,7 @@ function renderHeroChart(metrics) {
             if (ctx.datasetIndex === 0 && ctx.dataIndex === 0) {
               return `${value.toLocaleString()}\n${periodLabel}`;
             }
-            // Stacked Total Header Label over Right Bar (Renders on Top Segment)
+            // Stacked Total Header Label over Right Bar
             if (ctx.datasetIndex === 2 && ctx.dataIndex === 1) {
               return `COMBINED\n< ${combinedTotal.toLocaleString()}\nCOLLISIONS`;
             }

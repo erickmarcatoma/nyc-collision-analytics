@@ -84,7 +84,7 @@
       border-bottom: 2px solid #38bdf8;
     }
 
-    /* Hero Section (Dark Theme) */
+    /* Hero Section */
     .hero-section {
       padding: 2.5rem 2rem;
       display: grid;
@@ -96,10 +96,9 @@
 
     .hero-chart-container {
       position: relative;
-      height: 280px;
+      height: 290px;
     }
 
-    /* Reporting Bias Data Note Box */
     .data-note-box {
       font-size: 0.75rem;
       color: #94a3b8;
@@ -119,7 +118,6 @@
       padding-left: 1rem;
     }
 
-    /* All Road User Pill Badges */
     .user-badges {
       display: flex;
       gap: 0.6rem;
@@ -204,7 +202,7 @@
       font-size: 0.85rem;
     }
 
-    /* Bottom White Showcase Section */
+    /* Bottom Showcase Section */
     .showcase-section {
       background: #ffffff;
       color: #1e293b;
@@ -250,12 +248,20 @@
       font-size: 1.2rem;
     }
 
+    /* FIXED: Prevent Text Overlap in Column 1 */
+    .stat-number-wrapper {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
     .stat-number {
       font-family: 'Oswald', sans-serif;
       font-size: 2.2rem;
       font-weight: 700;
       color: #dc2626;
       line-height: 1;
+      margin-bottom: 0.2rem;
     }
 
     .stat-label {
@@ -263,6 +269,7 @@
       font-weight: 700;
       color: #64748b;
       text-transform: uppercase;
+      letter-spacing: 0.04em;
     }
 
     .insight-text {
@@ -434,7 +441,7 @@
         <div class="col-title">The Insight</div>
         <div class="insight-stat">
           <div class="insight-icon">🚸</div>
-          <div>
+          <div class="stat-number-wrapper">
             <div class="stat-number" id="kpi-inattention">24,000+</div>
             <div class="stat-label">Annual Collisions</div>
           </div>
