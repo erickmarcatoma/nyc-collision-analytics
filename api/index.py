@@ -58,7 +58,8 @@ def get_kpi_summary():
                 "leading_cause": "N/A",
                 "leading_cause_count": 0,
                 "primary_cause_share": 0.0,
-                "allocation_ratio": "0:0"
+                "infrastructure_count": 0,
+                "enforcement_count": 0
             })
 
         factor_counts = {}
@@ -69,7 +70,7 @@ def get_kpi_summary():
             factor = record.get("contributing_factor_vehicle_1", "Unknown").upper()
             factor_counts[factor] = factor_counts.get(factor, 0) + 1
 
-            # Categorize for Allocation Ratio
+            # Categorize for Infrastructure Need vs Enforcement
             if "DRIVER INATTENTION" in factor or "DISTRACTION" in factor:
                 inattention_count += 1
             elif "CELL PHONE" in factor or "ALCOHOL" in factor or "UNSAFE SPEED" in factor:
@@ -103,7 +104,7 @@ def get_kpi_summary():
 
 
 # =========================================================
-# PART B: COMPARISON ENDPOINT
+# COMPARISON ENDPOINT
 # =========================================================
 @app.route("/api/collisions/comparison", methods=["GET", "OPTIONS"])
 def get_collision_comparison():

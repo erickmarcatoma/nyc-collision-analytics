@@ -5,33 +5,208 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NYC Collision Analytics Dashboard</title>
 
+  <!-- Google Fonts & Chart.js CDN -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
-    body { background-color: #0f172a; color: #f8fafc; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 2rem 1rem; }
-    header { text-align: center; margin-bottom: 2rem; max-width: 800px; }
-    header h1 { font-size: 2rem; font-weight: 800; color: #38bdf8; margin-bottom: 0.5rem; }
-    header p { font-size: 0.95rem; color: #94a3b8; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      background-color: #0f172a;
+      color: #f8fafc;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+      max-width: 800px;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #38bdf8;
+      margin-bottom: 0.5rem;
+    }
+
+    header p {
+      font-size: 0.95rem;
+      color: #94a3b8;
+    }
 
     /* Part A: KPI Grid Layout */
-    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; width: 100%; max-width: 800px; margin-bottom: 2rem; }
-    .kpi-card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 1.25rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3); }
-    .kpi-title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
-    .kpi-value { font-size: 1.75rem; font-weight: 800; color: #f8fafc; }
-    .kpi-subtext { font-size: 0.8rem; color: #cbd5e1; margin-top: 0.35rem; }
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.25rem;
+      width: 100%;
+      max-width: 800px;
+      margin-bottom: 1.5rem;
+    }
 
-    .filter-bar { background: #1e293b; padding: 1rem 1.5rem; border-radius: 12px; display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: center; margin-bottom: 2rem; width: 100%; max-width: 800px; }
-    .filter-group { display: flex; flex-direction: column; gap: 0.25rem; }
-    .filter-group label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: #cbd5e1; }
-    select { background-color: #0f172a; color: #f8fafc; border: 1px solid #334155; padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.9rem; outline: none; }
-    button#update-btn { background-color: #0284c7; color: #ffffff; border: none; padding: 0.65rem 1.25rem; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 1rem; }
+    .kpi-card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 1.25rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+    }
 
-    .chart-card { background: #1e293b; padding: 1.5rem; border-radius: 12px; width: 100%; max-width: 800px; position: relative; }
-    .loading-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(30, 41, 59, 0.85); border-radius: 12px; align-items: center; justify-content: center; font-weight: 600; color: #38bdf8; z-index: 10; }
+    .kpi-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #94a3b8;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+
+    .kpi-value {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: #f8fafc;
+    }
+
+    .kpi-subtext {
+      font-size: 0.8rem;
+      color: #cbd5e1;
+      margin-top: 0.35rem;
+    }
+
+    /* Executive Insight Banner */
+    .insight-banner {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      border: 1px solid #38bdf8;
+      border-left: 5px solid #38bdf8;
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 2rem;
+      width: 100%;
+      max-width: 800px;
+      box-shadow: 0 4px 12px rgba(56, 189, 248, 0.1);
+    }
+
+    .insight-badge {
+      display: inline-block;
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      padding: 0.25rem 0.6rem;
+      border-radius: 4px;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+    }
+
+    .insight-banner p {
+      font-size: 0.95rem;
+      line-height: 1.5;
+      color: #cbd5e1;
+    }
+
+    .insight-banner strong {
+      color: #f8fafc;
+    }
+
+    .filter-bar {
+      background: #1e293b;
+      padding: 1rem 1.5rem;
+      border-radius: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+      margin-bottom: 2rem;
+      width: 100%;
+      max-width: 800px;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .filter-group label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #cbd5e1;
+      letter-spacing: 0.05em;
+    }
+
+    select {
+      background-color: #0f172a;
+      color: #f8fafc;
+      border: 1px solid #334155;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      outline: none;
+      cursor: pointer;
+    }
+
+    select:focus {
+      border-color: #38bdf8;
+    }
+
+    button#update-btn {
+      background-color: #0284c7;
+      color: #ffffff;
+      border: none;
+      padding: 0.65rem 1.25rem;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 1rem;
+      transition: background-color 0.2s ease;
+    }
+
+    button#update-btn:hover {
+      background-color: #0369a1;
+    }
+
+    .chart-card {
+      background: #1e293b;
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+      width: 100%;
+      max-width: 800px;
+      position: relative;
+    }
+
+    .loading-overlay {
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(30, 41, 59, 0.85);
+      border-radius: 12px;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      color: #38bdf8;
+      z-index: 10;
+    }
   </style>
 </head>
 <body>
@@ -60,7 +235,15 @@
     </div>
   </div>
 
-  <!-- Filter Bar -->
+  <!-- Executive Insight Callout Banner -->
+  <div class="insight-banner">
+    <div class="insight-badge">KEY INSIGHT</div>
+    <p id="executive-insight-text">
+      Driver inattention causes <strong id="inattention-count-text">24,000+</strong> annual collisions in NYC—dwarfing alcohol involvement and active phone use combined. This provides data-backed justification for prioritizing capital street redesigns over traditional police enforcement campaigns.
+    </p>
+  </div>
+
+  <!-- Filter Controls -->
   <div class="filter-bar">
     <div class="filter-group">
       <label for="borough-select">Borough</label>

@@ -20,7 +20,7 @@ async function fetchAndRenderDashboard() {
     // 1. Fetch Part A: Executive KPI Summary
     const kpiPromise = fetch(`/api/kpi?borough=${borough}&year=${year}`).then(res => res.json());
 
-    // 2. Fetch Part B: Comparative Chart Data
+    // 2. Fetch Comparative Chart Data
     const chartPromise = fetch(`/api/collisions/comparison?borough=${borough}&year=${year}`).then(res => res.json());
 
     const [kpiResult, chartResult] = await Promise.all([kpiPromise, chartPromise]);
@@ -30,7 +30,7 @@ async function fetchAndRenderDashboard() {
       renderKPICards(kpiResult.kpi);
     }
 
-    // Render Part B
+    // Render Chart
     if (chartResult.success) {
       renderChart(chartResult.metrics, borough, year);
     }
@@ -48,9 +48,15 @@ function renderKPICards(kpi) {
   document.getElementById('kpi-top-cause').textContent = kpi.leading_cause;
   document.getElementById('kpi-top-count').textContent = `${kpi.leading_cause_count.toLocaleString()} incidents`;
   document.getElementById('kpi-share').textContent = `${kpi.primary_cause_share}%`;
+
+  // Dynamically update the insight banner number
+  const inattentionEl = document.getElementById('inattention-count-text');
+  if (inattentionEl && kpi.infrastructure_count !== undefined) {
+    inattentionEl.textContent = `${kpi.infrastructure_count.toLocaleString()}+`;
+  }
 }
 
-// PART B: Chart Renderer
+// Chart Renderer
 function renderChart(metrics, borough, year) {
   const ctx = document.getElementById('comparisonChart').getContext('2d');
 
