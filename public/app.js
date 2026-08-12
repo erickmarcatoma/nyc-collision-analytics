@@ -25,11 +25,27 @@ document.addEventListener('DOMContentLoaded', () => {
   if (updateBtn) {
     updateBtn.addEventListener('click', fetchAndRenderDashboard);
   }
+
+  // AUTO-UPDATE: Re-fetch whenever Borough or Year dropdown selection changes
+  const boroughSelect = document.getElementById('borough-select');
+  const yearSelect = document.getElementById('year-select');
+
+  if (boroughSelect) {
+    boroughSelect.addEventListener('change', fetchAndRenderDashboard);
+  }
+  if (yearSelect) {
+    yearSelect.addEventListener('change', fetchAndRenderDashboard);
+  }
 });
 
 async function fetchAndRenderDashboard() {
-  const borough = document.getElementById('borough-select').value;
-  const year = document.getElementById('year-select').value;
+  const boroughSelect = document.getElementById('borough-select');
+  const yearSelect = document.getElementById('year-select');
+
+  if (!boroughSelect || !yearSelect) return;
+
+  const borough = boroughSelect.value;
+  const year = yearSelect.value;
 
   try {
     const kpiPromise = fetch(`/api/kpi?borough=${borough}&year=${year}`).then(res => res.json());
@@ -65,7 +81,7 @@ function updateInsightSection(kpi) {
     inattentionEl.textContent = `${formattedCount}+`;
   }
 
-  // 2. Dynamic Fix: Sync Col 2 Slider Text directly with Col 1 live filter data!
+  // 2. Update Col 2 Red text under the slider
   const sliderTextEl = document.getElementById('slider-inattention-text');
   if (sliderTextEl) {
     sliderTextEl.textContent = `${formattedCount}+ INATTENTION`;
