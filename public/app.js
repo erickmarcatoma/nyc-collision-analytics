@@ -48,6 +48,13 @@ function renderKPICards(kpi) {
   document.getElementById('kpi-top-count').textContent = `${kpi.leading_cause_count.toLocaleString()} incidents`;
   document.getElementById('kpi-share').textContent = `${kpi.primary_cause_share}%`;
 
+  // Update Allocation Ratio KPI Card directly from KPI payload
+  const ratioEl = document.getElementById('kpi-ratio');
+  if (ratioEl && kpi.allocation_ratio !== undefined) {
+    ratioEl.textContent = `${kpi.allocation_ratio}x`;
+  }
+
+  // Update Insight Banner count
   const inattentionEl = document.getElementById('inattention-count-text');
   if (inattentionEl && kpi.infrastructure_count !== undefined) {
     inattentionEl.textContent = `${kpi.infrastructure_count.toLocaleString()}+`;
@@ -59,12 +66,6 @@ function renderChart(metrics, borough, year) {
 
   if (comparisonChart) {
     comparisonChart.destroy();
-  }
-
-  // Update Allocation Ratio KPI Badge
-  const ratioEl = document.getElementById('kpi-ratio');
-  if (ratioEl && metrics.allocation_ratio !== undefined) {
-    ratioEl.textContent = `${metrics.allocation_ratio}x`;
   }
 
   const boroughLabel = borough === 'ALL' ? 'All NYC Boroughs' : borough;
