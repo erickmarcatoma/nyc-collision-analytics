@@ -1,9 +1,9 @@
-// Register ChartDataLabels plugin for Chart.js
 if (typeof ChartDataLabels !== 'undefined') {
   Chart.register(ChartDataLabels);
 }
 
-let comparisonChart = null;
+let heroChart = null;
+let budgetChart = null;
 
 document.addEventListener('DOMContentLoaded', () => {
   fetchAndRenderDashboard();
@@ -17,9 +17,6 @@ document.addEventListener('DOMContentLoaded', () => {
 async function fetchAndRenderDashboard() {
   const borough = document.getElementById('borough-select').value;
   const year = document.getElementById('year-select').value;
-  const loadingEl = document.getElementById('loading');
-
-  if (loadingEl) loadingEl.style.display = 'flex';
 
   try {
     const kpiPromise = fetch(`/api/kpi?borough=${borough}&year=${year}`).then(res => res.json());
@@ -28,100 +25,111 @@ async function fetchAndRenderDashboard() {
     const [kpiResult, chartResult] = await Promise.all([kpiPromise, chartPromise]);
 
     if (kpiResult.success) {
-      renderKPICards(kpiResult.kpi);
+      updateInsightSection(kpiResult.kpi);
     }
 
     if (chartResult.success) {
-      renderChart(chartResult.metrics, borough, year);
+      renderHeroChart(chartResult.metrics);
+      renderBudgetChart(chartResult.metrics);
     }
 
   } catch (error) {
-    console.error('Dashboard Engine Error:', error);
-  } finally {
-    if (loadingEl) loadingEl.style.display = 'none';
+    console.error('Advocacy Engine Error:', error);
   }
 }
 
-function renderKPICards(kpi) {
-  document.getElementById('kpi-volume').textContent = kpi.total_volume.toLocaleString();
-  document.getElementById('kpi-top-cause').textContent = kpi.leading_cause;
-  document.getElementById('kpi-top-count').textContent = `${kpi.leading_cause_count.toLocaleString()} incidents`;
-  document.getElementById('kpi-share').textContent = `${kpi.primary_cause_share}%`;
-
-  // Update Allocation Ratio KPI Card directly from KPI payload
-  const ratioEl = document.getElementById('kpi-ratio');
-  if (ratioEl && kpi.allocation_ratio !== undefined) {
-    ratioEl.textContent = `${kpi.allocation_ratio}x`;
-  }
-
-  // Update Insight Banner count
-  const inattentionEl = document.getElementById('inattention-count-text');
+function updateInsightSection(kpi) {
+  const inattentionEl = document.getElementById('kpi-inattention');
   if (inattentionEl && kpi.infrastructure_count !== undefined) {
     inattentionEl.textContent = `${kpi.infrastructure_count.toLocaleString()}+`;
   }
 }
 
-function renderChart(metrics, borough, year) {
-  const ctx = document.getElementById('comparisonChart').getContext('2d');
+function renderHeroChart(metrics) {
+  const ctx = document.getElementById('heroChart').getContext('2d');
 
-  if (comparisonChart) {
-    comparisonChart.destroy();
-  }
+  if (heroChart) heroChart.destroy();
 
-  const boroughLabel = borough === 'ALL' ? 'All NYC Boroughs' : borough;
-  const yearLabel = year === 'ALL' ? '2012–Present' : year;
-
-  comparisonChart = new Chart(ctx, {
+  heroChart = new Chart(ctx, {
     type: 'bar',
     data: {
-      labels: [
-        'Infrastructure-Bound (Driver Inattention)', 
-        'Enforceable Offenses (Cell Phone / Alcohol / Speeding)'
-      ],
+      labels: ['DRIVER INATTENTION', 'ALCOHOL + PHONE USE'],
       datasets: [{
-        label: `Collisions in ${boroughLabel} (${yearLabel})`,
         data: [metrics.infrastructure_bound, metrics.enforceable],
-        backgroundColor: ['#ef4444', '#3b82f6'],
-        borderColor: ['#dc2626', '#2563eb'],
-        borderWidth: 1,
-        borderRadius: 6
+        backgroundColor: ['#ef4444', '#a855f7'],
+        borderRadius: 4,
+        barThickness: 65
       }]
     },
     options: {
       responsive: true,
-      maintainAspectRatio: true,
-      layout: {
-        padding: { top: 25 }
-      },
+      maintainAspectRatio: false,
       plugins: {
-        title: {
-          display: true,
-          text: `Root Cause Comparison: Infrastructure Need vs. Ticketable Offenses (${yearLabel})`,
-          color: '#f8fafc',
-          font: { size: 15, weight: '600' },
-          padding: { bottom: 20 }
-        },
         legend: { display: false },
         datalabels: {
           anchor: 'end',
           align: 'top',
-          color: '#f8fafc',
-          font: { weight: 'bold', size: 12 },
-          formatter: function(value) {
-            return value.toLocaleString() + ' crashes';
-          }
-        },
-        tooltip: {
-          callbacks: {
-            label: function(context) {
-              return ` Total Incidents: ${context.parsed.y.toLocaleString()}`;
-            }
+          color: '#ffffff',
+          font: { family: 'Oswald', size: 14, weight: 'bold' },
+          formatter: function(value, ctx) {
+            return ctx.dataIndex === 0 ? `${value.toLocaleString()}\nANNUAL COLLISIONS` : `< ${value.toLocaleString()}\nCOMBINED`;
           }
         }
       },
       scales: {
-        x: { ticks: { color: '#94a3b8', font: { size: 11 } }, grid: { color: '#334155' } },
-        y: { beginAtZero: true, ticks: { color: '#94a3b8' }, grid: { color: '#334155' } }
+        x: {
+          ticks: { color: '#ffffff', font: { family: 'Oswald', size: 12 } },
+          grid: { display: false }
+        },
+        y: {
+          display: false,
+          beginAtZero: true
+        }
+      }
+    }
+  });
+}
+
+function renderBudgetChart(metrics) {
+  const ctx = document.getElementById('budgetChart').getContext('2d');
+
+  if (budgetChart) budgetChart.destroy();
+
+  budgetChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['ENFORCEMENT', 'STREET REDESIGN'],
+      datasets: [{
+        data: [metrics.enforceable, metrics.infrastructure_bound],
+        backgroundColor: ['#475569', '#6ee7b7'],
+        borderRadius: 4,
+        barThickness: 45
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        datalabels: {
+          anchor: 'end',
+          align: 'top',
+          color: '#0f172a',
+          font: { family: 'Oswald', size: 11, weight: 'bold' },
+          formatter: function(value) {
+            return value.toLocaleString();
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: '#0f172a', font: { family: 'Oswald', size: 10 } },
+          grid: { display: false }
+        },
+        y: {
+          display: false,
+          beginAtZero: true
+        }
       }
     }
   });
