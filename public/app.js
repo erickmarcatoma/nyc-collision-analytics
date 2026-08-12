@@ -90,8 +90,13 @@ function updateInsightSection(kpi) {
 
 function renderHeroChart(metrics) {
   const ctx = document.getElementById('heroChart').getContext('2d');
+  const yearSelect = document.getElementById('year-select');
+  const selectedYear = yearSelect ? yearSelect.value : '2025';
 
   if (heroChart) heroChart.destroy();
+
+  // Dynamic period label: Uses YTD for current year (2026), ANNUAL for past full years
+  const periodLabel = selectedYear === '2026' ? 'YTD COLLISIONS' : 'ANNUAL COLLISIONS';
 
   heroChart = new Chart(ctx, {
     type: 'bar',
@@ -108,17 +113,22 @@ function renderHeroChart(metrics) {
       responsive: true,
       maintainAspectRatio: false,
       layout: {
-        padding: { top: 30 }
+        // Increased top padding ensures the datalabel numbers and subtext never overlap
+        padding: { top: 45, bottom: 10 }
       },
       plugins: {
         legend: { display: false },
         datalabels: {
           anchor: 'end',
           align: 'top',
+          offset: 4,
           color: '#ffffff',
-          font: { family: 'Oswald', size: 14, weight: 'bold' },
+          font: { family: 'Oswald', size: 13, weight: 'bold' },
           formatter: function(value, ctx) {
-            return ctx.dataIndex === 0 ? `${value.toLocaleString()}\nANNUAL COLLISIONS` : `< ${value.toLocaleString()}\nCOMBINED`;
+            if (ctx.dataIndex === 0) {
+              return `${value.toLocaleString()}\n${periodLabel}`;
+            }
+            return `< ${value.toLocaleString()}\nCOMBINED`;
           }
         }
       },
