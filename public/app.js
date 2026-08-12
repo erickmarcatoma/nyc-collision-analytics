@@ -46,6 +46,9 @@ async function fetchAndRenderDashboard() {
   const borough = boroughSelect.value;
   const year = yearSelect.value;
 
+  // 1. STATE: SHOW SPINNER OVERLAY
+  showLoadingState(true);
+
   try {
     const kpiPromise = fetch(`/api/kpi?borough=${borough}&year=${year}`).then(res => res.json());
     const chartPromise = fetch(`/api/collisions/comparison?borough=${borough}&year=${year}`).then(res => res.json());
@@ -53,6 +56,13 @@ async function fetchAndRenderDashboard() {
 
     const [kpiResult, chartResult, mapResult] = await Promise.all([kpiPromise, chartPromise, mapPromise]);
 
+    // 2. STATE: EMPTY RESULT HANDLING
+    if (kpiResult.success && kpiResult.kpi.total_volume === 0) {
+      showEmptyState();
+      return;
+    }
+
+    // 3. STATE: RENDER LIVE DATA
     if (kpiResult.success) {
       updateInsightSection(kpiResult.kpi);
     }
@@ -67,10 +77,61 @@ async function fetchAndRenderDashboard() {
     }
 
   } catch (error) {
+    // 4. STATE: ERROR RECOVERY HANDLER
     console.error('Advocacy Engine Error:', error);
+    showErrorState();
+  } finally {
+    showLoadingState(false);
   }
 }
 
+/* =========================================================
+   UI STATE HANDLERS (Spinner, Empty, Error)
+========================================================= */
+function showLoadingState(isLoading) {
+  const heroContainer = document.querySelector('.hero-chart-container');
+  if (!heroContainer) return;
+
+  let overlay = document.getElementById('hero-loading-overlay');
+  if (isLoading) {
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'hero-loading-overlay';
+      overlay.className = 'chart-loading-overlay';
+      overlay.innerHTML = `
+        <div class="spinner"></div>
+        <div style="font-size:0.75rem; color:#94a3b8; margin-top:0.6rem; font-family:'Oswald', sans-serif; letter-spacing:0.05em;">FETCHING LIVE CITY DATA...</div>
+      `;
+      heroContainer.appendChild(overlay);
+    }
+    overlay.style.display = 'flex';
+  } else if (overlay) {
+    overlay.style.display = 'none';
+  }
+}
+
+function showEmptyState() {
+  const inattentionEl = document.getElementById('kpi-inattention');
+  if (inattentionEl) inattentionEl.textContent = '0';
+
+  const sliderTextEl = document.getElementById('slider-inattention-text');
+  if (sliderTextEl) sliderTextEl.textContent = '0 INATTENTION';
+
+  if (heroChart) heroChart.destroy();
+  if (budgetChart) budgetChart.destroy();
+}
+
+function showErrorState() {
+  const inattentionEl = document.getElementById('kpi-inattention');
+  if (inattentionEl) inattentionEl.textContent = 'N/A';
+
+  const sliderTextEl = document.getElementById('slider-inattention-text');
+  if (sliderTextEl) sliderTextEl.textContent = 'NO DATA AVAILABLE';
+}
+
+/* =========================================================
+   DASHBOARD COMPONENT RENDERERS
+========================================================= */
 function updateInsightSection(kpi) {
   const formattedCount = kpi.infrastructure_count ? kpi.infrastructure_count.toLocaleString() : '0';
 
@@ -100,7 +161,6 @@ function renderHeroChart(metrics) {
     data: {
       labels: ['DRIVER INATTENTION', 'ALCOHOL + PHONE USE'],
       datasets: [
-        // Dataset 0: Driver Inattention (Red Bar - Left)
         {
           label: 'Inattention',
           data: [metrics.infrastructure_bound, 0],
@@ -109,7 +169,6 @@ function renderHeroChart(metrics) {
           barThickness: 65,
           stack: 'stack1'
         },
-        // Dataset 1: Cell Phone Use (Cyan Segment - Bottom Right)
         {
           label: 'Cell Phone Use',
           data: [0, metrics.phone_count || 0],
@@ -118,7 +177,6 @@ function renderHeroChart(metrics) {
           barThickness: 65,
           stack: 'stack1'
         },
-        // Dataset 2: Alcohol Involvement (Purple Segment - Top Right)
         {
           label: 'Alcohol Involvement',
           data: [0, metrics.alcohol_count || 0],
@@ -133,7 +191,6 @@ function renderHeroChart(metrics) {
       responsive: true,
       maintainAspectRatio: false,
       layout: {
-        // INCREASED TOP PADDING TO PREVENT TEXT CLIPPING AT THE TOP EDGE
         padding: { top: 65, bottom: 10 }
       },
       plugins: {
@@ -145,11 +202,9 @@ function renderHeroChart(metrics) {
           color: '#ffffff',
           font: { family: 'Oswald', size: 13, weight: 'bold' },
           formatter: function(value, ctx) {
-            // Label over Left Bar
             if (ctx.datasetIndex === 0 && ctx.dataIndex === 0) {
               return `${value.toLocaleString()}\n${periodLabel}`;
             }
-            // Stacked Total Header Label over Right Bar
             if (ctx.datasetIndex === 2 && ctx.dataIndex === 1) {
               return `COMBINED\n< ${combinedTotal.toLocaleString()}\nCOLLISIONS`;
             }

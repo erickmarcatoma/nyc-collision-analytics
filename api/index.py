@@ -103,7 +103,7 @@ def get_kpi_summary():
 
 
 # =========================================================
-# PART B: COMPARISON ENDPOINT (SEPARATED ENFORCEMENT METRICS)
+# PART B: COMPARISON ENDPOINT
 # =========================================================
 @app.route("/api/collisions/comparison", methods=["GET", "OPTIONS"])
 def get_collision_comparison():
