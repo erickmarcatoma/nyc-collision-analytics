@@ -1,47 +1,59 @@
 let comparisonChart = null;
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Execute initial load on startup
-  fetchAndRenderChart();
+  fetchAndRenderDashboard();
 
-  // Attach click event handler to the analysis button
   const updateBtn = document.getElementById('update-btn');
   if (updateBtn) {
-    updateBtn.addEventListener('click', fetchAndRenderChart);
+    updateBtn.addEventListener('click', fetchAndRenderDashboard);
   }
 });
 
-async function fetchAndRenderChart() {
+async function fetchAndRenderDashboard() {
   const borough = document.getElementById('borough-select').value;
   const year = document.getElementById('year-select').value;
   const loadingEl = document.getElementById('loading');
 
-  // Show loading indicator
   if (loadingEl) loadingEl.style.display = 'flex';
 
   try {
-    const response = await fetch(`/api/collisions/comparison?borough=${borough}&year=${year}`);
-    const result = await response.json();
+    // 1. Fetch Part A: Executive KPI Summary
+    const kpiPromise = fetch(`/api/kpi?borough=${borough}&year=${year}`).then(res => res.json());
 
-    if (result.success) {
-      renderChart(result.metrics, borough, year);
-    } else {
-      console.error('Backend API Error:', result.error);
-      alert('Error fetching data: ' + result.error);
+    // 2. Fetch Part B: Comparative Chart Data
+    const chartPromise = fetch(`/api/collisions/comparison?borough=${borough}&year=${year}`).then(res => res.json());
+
+    const [kpiResult, chartResult] = await Promise.all([kpiPromise, chartPromise]);
+
+    // Render Part A
+    if (kpiResult.success) {
+      renderKPICards(kpiResult.kpi);
     }
+
+    // Render Part B
+    if (chartResult.success) {
+      renderChart(chartResult.metrics, borough, year);
+    }
+
   } catch (error) {
-    console.error('Fetch Error:', error);
-    alert('Failed to connect to the server API.');
+    console.error('Dashboard Engine Error:', error);
   } finally {
-    // Hide loading indicator
     if (loadingEl) loadingEl.style.display = 'none';
   }
 }
 
+// PART A: Executive KPI Renderer
+function renderKPICards(kpi) {
+  document.getElementById('kpi-volume').textContent = kpi.total_volume.toLocaleString();
+  document.getElementById('kpi-top-cause').textContent = kpi.leading_cause;
+  document.getElementById('kpi-top-count').textContent = `${kpi.leading_cause_count.toLocaleString()} incidents`;
+  document.getElementById('kpi-share').textContent = `${kpi.primary_cause_share}%`;
+}
+
+// PART B: Chart Renderer
 function renderChart(metrics, borough, year) {
   const ctx = document.getElementById('comparisonChart').getContext('2d');
 
-  // Safely destroy previous chart instance before redrawing
   if (comparisonChart) {
     comparisonChart.destroy();
   }
@@ -59,14 +71,8 @@ function renderChart(metrics, borough, year) {
       datasets: [{
         label: `Collisions in ${boroughLabel} (${yearLabel})`,
         data: [metrics.infrastructure_bound, metrics.enforceable],
-        backgroundColor: [
-          '#ef4444', // Red for Infrastructure Need
-          '#3b82f6'  // Blue for Enforcement Target
-        ],
-        borderColor: [
-          '#dc2626',
-          '#2563eb'
-        ],
+        backgroundColor: ['#ef4444', '#3b82f6'],
+        borderColor: ['#dc2626', '#2563eb'],
         borderWidth: 1,
         borderRadius: 6
       }]
@@ -79,19 +85,10 @@ function renderChart(metrics, borough, year) {
           display: true,
           text: `Root Cause Comparison: Infrastructure Need vs. Ticketable Offenses (${yearLabel})`,
           color: '#f8fafc',
-          font: {
-            size: 15,
-            weight: '600'
-          },
-          padding: {
-            bottom: 20
-          }
+          font: { size: 15, weight: '600' },
+          padding: { bottom: 20 }
         },
-        legend: {
-          labels: {
-            color: '#cbd5e1'
-          }
-        },
+        legend: { labels: { color: '#cbd5e1' } },
         tooltip: {
           callbacks: {
             label: function(context) {
@@ -101,15 +98,8 @@ function renderChart(metrics, borough, year) {
         }
       },
       scales: {
-        x: {
-          ticks: { color: '#94a3b8', font: { size: 11 } },
-          grid: { color: '#334155' }
-        },
-        y: {
-          beginAtZero: true,
-          ticks: { color: '#94a3b8' },
-          grid: { color: '#334155' }
-        }
+        x: { ticks: { color: '#94a3b8', font: { size: 11 } }, grid: { color: '#334155' } },
+        y: { beginAtZero: true, ticks: { color: '#94a3b8' }, grid: { color: '#334155' } }
       }
     }
   });

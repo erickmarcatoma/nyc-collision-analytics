@@ -5,143 +5,62 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NYC Collision Analytics Dashboard</title>
 
-  <!-- Google Fonts & Chart.js CDN -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Inter', sans-serif;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+    body { background-color: #0f172a; color: #f8fafc; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 2rem 1rem; }
+    header { text-align: center; margin-bottom: 2rem; max-width: 800px; }
+    header h1 { font-size: 2rem; font-weight: 800; color: #38bdf8; margin-bottom: 0.5rem; }
+    header p { font-size: 0.95rem; color: #94a3b8; }
 
-    body {
-      background-color: #0f172a;
-      color: #f8fafc;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 2rem 1rem;
-    }
+    /* Part A: KPI Grid Layout */
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; width: 100%; max-width: 800px; margin-bottom: 2rem; }
+    .kpi-card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 1.25rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3); }
+    .kpi-title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+    .kpi-value { font-size: 1.75rem; font-weight: 800; color: #f8fafc; }
+    .kpi-subtext { font-size: 0.8rem; color: #cbd5e1; margin-top: 0.35rem; }
 
-    header {
-      text-align: center;
-      margin-bottom: 2rem;
-      max-width: 800px;
-    }
+    .filter-bar { background: #1e293b; padding: 1rem 1.5rem; border-radius: 12px; display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: center; margin-bottom: 2rem; width: 100%; max-width: 800px; }
+    .filter-group { display: flex; flex-direction: column; gap: 0.25rem; }
+    .filter-group label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: #cbd5e1; }
+    select { background-color: #0f172a; color: #f8fafc; border: 1px solid #334155; padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.9rem; outline: none; }
+    button#update-btn { background-color: #0284c7; color: #ffffff; border: none; padding: 0.65rem 1.25rem; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 1rem; }
 
-    header h1 {
-      font-size: 2rem;
-      font-weight: 700;
-      color: #38bdf8;
-      margin-bottom: 0.5rem;
-    }
-
-    header p {
-      font-size: 0.95rem;
-      color: #94a3b8;
-    }
-
-    .filter-bar {
-      background: #1e293b;
-      padding: 1rem 1.5rem;
-      border-radius: 12px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
-      margin-bottom: 2rem;
-      width: 100%;
-      max-width: 800px;
-    }
-
-    .filter-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
-    }
-
-    .filter-group label {
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      color: #cbd5e1;
-      letter-spacing: 0.05em;
-    }
-
-    select {
-      background-color: #0f172a;
-      color: #f8fafc;
-      border: 1px solid #334155;
-      padding: 0.5rem 1rem;
-      border-radius: 6px;
-      font-size: 0.9rem;
-      outline: none;
-      cursor: pointer;
-    }
-
-    select:focus {
-      border-color: #38bdf8;
-    }
-
-    button#update-btn {
-      background-color: #0284c7;
-      color: #ffffff;
-      border: none;
-      padding: 0.65rem 1.25rem;
-      border-radius: 6px;
-      font-weight: 600;
-      cursor: pointer;
-      margin-top: 1rem;
-      transition: background-color 0.2s ease;
-    }
-
-    button#update-btn:hover {
-      background-color: #0369a1;
-    }
-
-    .chart-card {
-      background: #1e293b;
-      padding: 1.5rem;
-      border-radius: 12px;
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
-      width: 100%;
-      max-width: 800px;
-      position: relative;
-    }
-
-    .loading-overlay {
-      display: none;
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(30, 41, 59, 0.85);
-      border-radius: 12px;
-      align-items: center;
-      justify-content: center;
-      font-weight: 600;
-      color: #38bdf8;
-      z-index: 10;
-    }
+    .chart-card { background: #1e293b; padding: 1.5rem; border-radius: 12px; width: 100%; max-width: 800px; position: relative; }
+    .loading-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(30, 41, 59, 0.85); border-radius: 12px; align-items: center; justify-content: center; font-weight: 600; color: #38bdf8; z-index: 10; }
   </style>
 </head>
 <body>
 
   <header>
     <h1>NYC Collision Analytics Dashboard</h1>
-    <p>Capital Allocation Support: Comparing Infrastructure-Bound Causes vs. Enforceable Offenses</p>
+    <p>Capital Allocation Support: Concrete Over Enforcement</p>
   </header>
 
-  <!-- Filter Controls -->
+  <!-- Part A: Executive KPI Summary -->
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-title">Total Collision Volume</div>
+      <div class="kpi-value" id="kpi-volume">--</div>
+      <div class="kpi-subtext">Reported Incidents</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-title">Leading Root Cause</div>
+      <div class="kpi-value" id="kpi-top-cause" style="font-size: 1.15rem; color: #ef4444;">--</div>
+      <div class="kpi-subtext" id="kpi-top-count">-- incidents</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-title">Primary Cause Share</div>
+      <div class="kpi-value" id="kpi-share">--%</div>
+      <div class="kpi-subtext">Of Total Crashes</div>
+    </div>
+  </div>
+
+  <!-- Filter Bar -->
   <div class="filter-bar">
     <div class="filter-group">
       <label for="borough-select">Borough</label>
@@ -166,14 +85,6 @@
         <option value="2022">2022</option>
         <option value="2021">2021</option>
         <option value="2020">2020</option>
-        <option value="2019">2019</option>
-        <option value="2018">2018</option>
-        <option value="2017">2017</option>
-        <option value="2016">2016</option>
-        <option value="2015">2015</option>
-        <option value="2014">2014</option>
-        <option value="2013">2013</option>
-        <option value="2012">2012</option>
       </select>
     </div>
 
