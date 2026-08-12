@@ -174,7 +174,6 @@ function renderMapPoints(points, borough) {
   mapInstance.setView([centerConfig[0], centerConfig[1]], centerConfig[2]);
 
   points.forEach(pt => {
-    // Choose pin color based on road user impact
     let color = '#ef4444';
     if (pt.user_type.includes('Pedestrian')) color = '#38bdf8';
     else if (pt.user_type.includes('Cyclist')) color = '#10b981';

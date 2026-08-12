@@ -200,7 +200,6 @@ def get_map_coordinates():
                 cyc_inj = int(record.get("number_of_cyclist_injured", 0))
                 mot_inj = int(record.get("number_of_motorist_injured", 0))
 
-                # Identify primary road user impact
                 user_type = "Multi-Vehicle / Driver"
                 if ped_inj > 0:
                     user_type = "🚸 Pedestrian Struck"

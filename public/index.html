@@ -88,15 +88,31 @@
     .hero-section {
       padding: 2.5rem 2rem;
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1.1fr 0.9fr;
       gap: 2rem;
-      align-items: center;
+      align-items: start;
       background: #232d36;
     }
 
     .hero-chart-container {
       position: relative;
       height: 280px;
+    }
+
+    /* Reporting Bias Data Note Box */
+    .data-note-box {
+      font-size: 0.75rem;
+      color: #94a3b8;
+      border-left: 2px solid #38bdf8;
+      background: rgba(15, 23, 42, 0.4);
+      padding: 0.6rem 0.8rem;
+      margin-top: 1rem;
+      line-height: 1.45;
+      border-radius: 0 4px 4px 0;
+    }
+
+    .data-note-box strong {
+      color: #cbd5e1;
     }
 
     .hero-text {
@@ -387,8 +403,14 @@
 
     <!-- Hero Section -->
     <section class="hero-section">
-      <div class="hero-chart-container">
-        <canvas id="heroChart"></canvas>
+      <div>
+        <div class="hero-chart-container">
+          <canvas id="heroChart"></canvas>
+        </div>
+        <!-- Reporting Bias Caveat Note -->
+        <div class="data-note-box">
+          <strong>Data Note on Reporting Bias:</strong> Distraction and driver inattention are often inferred during post-crash investigation, whereas moving violations (e.g., speeding, alcohol) rely on strict evidentiary thresholds. True distraction volume may be higher than recorded.
+        </div>
       </div>
 
       <div class="hero-text">
