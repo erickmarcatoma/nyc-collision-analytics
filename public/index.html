@@ -368,10 +368,65 @@
       border-top: 1px solid #2e3a46;
     }
 
+    .map-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
     .map-section .col-title {
       color: #ffffff;
       border-bottom-color: #2e3a46;
-      margin-bottom: 1rem;
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+
+    .map-btn-filter {
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.35rem 0.75rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
+      background: rgba(255, 255, 255, 0.08);
+      color: #94a3b8;
+    }
+
+    .map-btn-filter:hover {
+      background: rgba(255, 255, 255, 0.18);
+      color: #ffffff;
+    }
+
+    .map-btn-filter.active-all {
+      background: #ffffff;
+      color: #0f172a;
+      border-color: #ffffff;
+    }
+
+    .map-btn-filter.active-ped {
+      background: rgba(56, 189, 248, 0.2);
+      color: #38bdf8;
+      border-color: #38bdf8;
+    }
+
+    .map-btn-filter.active-cyc {
+      background: rgba(16, 185, 129, 0.2);
+      color: #10b981;
+      border-color: #10b981;
+    }
+
+    .map-btn-filter.active-drv {
+      background: rgba(245, 158, 11, 0.2);
+      color: #f59e0b;
+      border-color: #f59e0b;
     }
 
     #mapView {
@@ -426,6 +481,7 @@
       <div>
         <label for="year-select">Year Window:</label>
         <select id="year-select">
+          <option value="ALL">All Available Years (2012–Present)</option>
           <option value="2026">2026 (YTD)</option>
           <option value="2025" selected>2025 (Full Year Baseline)</option>
           <option value="2024">2024</option>
@@ -511,16 +567,24 @@
       </div>
     </section>
 
-    <!-- Spatial Heatmap Section -->
+    <!-- Spatial Heatmap Section with Interactive Filters -->
     <section class="map-section">
-      <div class="col-title">Spatial Incident Clusters (The "Moment" Engine)</div>
+      <div class="map-header-row">
+        <div class="col-title">Spatial Incident Clusters (The "Moment" Engine)</div>
+        <div style="display: flex; gap: 0.5rem;" id="map-filter-group">
+          <button class="map-btn-filter active-all" id="btn-map-all" onclick="filterMapPoints('ALL')">ALL USERS</button>
+          <button class="map-btn-filter" id="btn-map-ped" onclick="filterMapPoints('Pedestrian')">🚸 PEDESTRIANS</button>
+          <button class="map-btn-filter" id="btn-map-cyc" onclick="filterMapPoints('Cyclist')">🚲 CYCLISTS</button>
+          <button class="map-btn-filter" id="btn-map-drv" onclick="filterMapPoints('Driver')">🚘 DRIVERS</button>
+        </div>
+      </div>
       <div id="mapView"></div>
     </section>
 
     <!-- Footer -->
     <footer>
-      <div>NYC Vision Zero All-Road-User Advocacy</div>
-      <div>@NYC_VISIONZERO</div>
+      <div>NYC Vision Zero All-Road-User Advocacy (Independent Data Project)</div>
+      <div>Data Source: NYC Open Data</div>
     </footer>
   </div>
 

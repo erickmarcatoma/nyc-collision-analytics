@@ -7,6 +7,7 @@ let budgetChart = null;
 
 let mapInstance = null;
 let mapMarkersLayer = null;
+let currentMapPoints = []; // Stores latest points globally for instant client-side filtering
 
 const BOROUGH_CENTERS = {
   'ALL': [40.7128, -74.0060, 11],
@@ -46,7 +47,6 @@ async function fetchAndRenderDashboard() {
   const borough = boroughSelect.value;
   const year = yearSelect.value;
 
-  // 1. STATE: SHOW SPINNER OVERLAY
   showLoadingState(true);
 
   try {
@@ -56,13 +56,11 @@ async function fetchAndRenderDashboard() {
 
     const [kpiResult, chartResult, mapResult] = await Promise.all([kpiPromise, chartPromise, mapPromise]);
 
-    // 2. STATE: EMPTY RESULT HANDLING
     if (kpiResult.success && kpiResult.kpi.total_volume === 0) {
       showEmptyState();
       return;
     }
 
-    // 3. STATE: RENDER LIVE DATA
     if (kpiResult.success) {
       updateInsightSection(kpiResult.kpi);
     }
@@ -73,16 +71,56 @@ async function fetchAndRenderDashboard() {
     }
 
     if (mapResult.success) {
-      renderMapPoints(mapResult.points, borough);
+      currentMapPoints = mapResult.points;
+      renderMapPoints(currentMapPoints, borough);
+      resetMapFilterButtons();
     }
 
   } catch (error) {
-    // 4. STATE: ERROR RECOVERY HANDLER
     console.error('Advocacy Engine Error:', error);
     showErrorState();
   } finally {
     showLoadingState(false);
   }
+}
+
+/* =========================================================
+   INTERACTIVE MAP FILTER TOGGLES
+========================================================= */
+function filterMapPoints(userCategory) {
+  const boroughSelect = document.getElementById('borough-select');
+  const borough = boroughSelect ? boroughSelect.value : 'ALL';
+
+  updateMapFilterButtonStyles(userCategory);
+
+  if (userCategory === 'ALL') {
+    drawMapMarkers(currentMapPoints, borough);
+    return;
+  }
+
+  const filteredPoints = currentMapPoints.filter(pt => pt.user_type.includes(userCategory));
+  drawMapMarkers(filteredPoints, borough);
+}
+
+function updateMapFilterButtonStyles(selectedCategory) {
+  const btnAll = document.getElementById('btn-map-all');
+  const btnPed = document.getElementById('btn-map-ped');
+  const btnCyc = document.getElementById('btn-map-cyc');
+  const btnDrv = document.getElementById('btn-map-drv');
+
+  const allBtns = [btnAll, btnPed, btnCyc, btnDrv];
+  allBtns.forEach(btn => {
+    if (btn) btn.className = 'map-btn-filter';
+  });
+
+  if (selectedCategory === 'ALL' && btnAll) btnAll.className = 'map-btn-filter active-all';
+  if (selectedCategory === 'Pedestrian' && btnPed) btnPed.className = 'map-btn-filter active-ped';
+  if (selectedCategory === 'Cyclist' && btnCyc) btnCyc.className = 'map-btn-filter active-cyc';
+  if (selectedCategory === 'Driver' && btnDrv) btnDrv.className = 'map-btn-filter active-drv';
+}
+
+function resetMapFilterButtons() {
+  updateMapFilterButtonStyles('ALL');
 }
 
 /* =========================================================
@@ -119,6 +157,7 @@ function showEmptyState() {
 
   if (heroChart) heroChart.destroy();
   if (budgetChart) budgetChart.destroy();
+  if (mapMarkersLayer) mapMarkersLayer.clearLayers();
 }
 
 function showErrorState() {
@@ -290,6 +329,10 @@ function initMapIfNeeded() {
 }
 
 function renderMapPoints(points, borough) {
+  drawMapMarkers(points, borough);
+}
+
+function drawMapMarkers(pointsToDraw, borough) {
   if (!mapInstance || !mapMarkersLayer) return;
 
   mapMarkersLayer.clearLayers();
@@ -297,7 +340,7 @@ function renderMapPoints(points, borough) {
   const centerConfig = BOROUGH_CENTERS[borough.toUpperCase()] || BOROUGH_CENTERS['ALL'];
   mapInstance.setView([centerConfig[0], centerConfig[1]], centerConfig[2]);
 
-  points.forEach(pt => {
+  pointsToDraw.forEach(pt => {
     let color = '#ef4444';
     if (pt.user_type.includes('Pedestrian')) color = '#38bdf8';
     else if (pt.user_type.includes('Cyclist')) color = '#10b981';
