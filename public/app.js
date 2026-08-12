@@ -26,7 +26,6 @@ document.addEventListener('DOMContentLoaded', () => {
     updateBtn.addEventListener('click', fetchAndRenderDashboard);
   }
 
-  // AUTO-UPDATE: Re-fetch whenever Borough or Year dropdown selection changes
   const boroughSelect = document.getElementById('borough-select');
   const yearSelect = document.getElementById('year-select');
 
@@ -75,13 +74,11 @@ async function fetchAndRenderDashboard() {
 function updateInsightSection(kpi) {
   const formattedCount = kpi.infrastructure_count ? kpi.infrastructure_count.toLocaleString() : '0';
 
-  // 1. Update Col 1 Big Number
   const inattentionEl = document.getElementById('kpi-inattention');
   if (inattentionEl) {
     inattentionEl.textContent = `${formattedCount}+`;
   }
 
-  // 2. Update Col 2 Red text under the slider
   const sliderTextEl = document.getElementById('slider-inattention-text');
   if (sliderTextEl) {
     sliderTextEl.textContent = `${formattedCount}+ INATTENTION`;
@@ -95,25 +92,27 @@ function renderHeroChart(metrics) {
 
   if (heroChart) heroChart.destroy();
 
-  // Dynamic period label: Uses YTD for current year (2026), ANNUAL for past full years
   const periodLabel = selectedYear === '2026' ? 'YTD COLLISIONS' : 'ANNUAL COLLISIONS';
 
   heroChart = new Chart(ctx, {
     type: 'bar',
     data: {
-      labels: ['DRIVER INATTENTION', 'ALCOHOL + PHONE USE'],
+      labels: ['DRIVER INATTENTION', 'ALCOHOL INVOLVEMENT', 'CELL PHONE USE'],
       datasets: [{
-        data: [metrics.infrastructure_bound, metrics.enforceable],
-        backgroundColor: ['#ef4444', '#a855f7'],
+        data: [
+          metrics.infrastructure_bound, 
+          metrics.alcohol_count || 0, 
+          metrics.phone_count || 0
+        ],
+        backgroundColor: ['#ef4444', '#a855f7', '#38bdf8'],
         borderRadius: 4,
-        barThickness: 65
+        barThickness: 50
       }]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
       layout: {
-        // Increased top padding ensures the datalabel numbers and subtext never overlap
         padding: { top: 45, bottom: 10 }
       },
       plugins: {
@@ -123,18 +122,18 @@ function renderHeroChart(metrics) {
           align: 'top',
           offset: 4,
           color: '#ffffff',
-          font: { family: 'Oswald', size: 13, weight: 'bold' },
+          font: { family: 'Oswald', size: 12, weight: 'bold' },
           formatter: function(value, ctx) {
             if (ctx.dataIndex === 0) {
               return `${value.toLocaleString()}\n${periodLabel}`;
             }
-            return `< ${value.toLocaleString()}\nCOMBINED`;
+            return `${value.toLocaleString()}\nCRASHES`;
           }
         }
       },
       scales: {
         x: {
-          ticks: { color: '#ffffff', font: { family: 'Oswald', size: 12 } },
+          ticks: { color: '#ffffff', font: { family: 'Oswald', size: 10 } },
           grid: { display: false }
         },
         y: {

@@ -103,7 +103,7 @@ def get_kpi_summary():
 
 
 # =========================================================
-# PART B: COMPARISON ENDPOINT
+# PART B: COMPARISON ENDPOINT (SPLIT ENFORCEMENT FACTORS)
 # =========================================================
 @app.route("/api/collisions/comparison", methods=["GET", "OPTIONS"])
 def get_collision_comparison():
@@ -132,16 +132,20 @@ def get_collision_comparison():
 
         data = response.json()
         inattention_count = 0
-        enforcement_count = 0
+        alcohol_count = 0
+        phone_count = 0
 
         for record in data:
             factor = record.get("contributing_factor_vehicle_1", "").upper()
             if "DRIVER INATTENTION" in factor or "DISTRACTION" in factor:
                 inattention_count += 1
-            elif "CELL PHONE" in factor or "ALCOHOL" in factor or "UNSAFE SPEED" in factor:
-                enforcement_count += 1
+            elif "ALCOHOL" in factor:
+                alcohol_count += 1
+            elif "CELL PHONE" in factor or "PHONE" in factor:
+                phone_count += 1
 
-        ratio = round(inattention_count / enforcement_count, 1) if enforcement_count > 0 else 0.0
+        enforcement_total = alcohol_count + phone_count
+        ratio = round(inattention_count / enforcement_total, 1) if enforcement_total > 0 else 0.0
 
         return jsonify({
             "success": True,
@@ -149,7 +153,9 @@ def get_collision_comparison():
             "borough": borough,
             "metrics": {
                 "infrastructure_bound": inattention_count,
-                "enforceable": enforcement_count,
+                "alcohol_count": alcohol_count,
+                "phone_count": phone_count,
+                "enforceable": enforcement_total,
                 "allocation_ratio": ratio
             },
         })
