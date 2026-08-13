@@ -209,19 +209,19 @@ function updateInsightSection(kpi) {
   const count = kpi.infrastructure_count || 0;
   const formattedCount = count.toLocaleString();
 
-  // 1. Update Col 1 Big Number
+  // 1. Update Core Insight Banner Count
   const inattentionEl = document.getElementById('kpi-inattention');
   if (inattentionEl) {
-    inattentionEl.textContent = `${formattedCount}+`;
+    inattentionEl.textContent = `${formattedCount}+ annual collisions`;
   }
 
-  // 2. Update Col 2 Red text under the slider
+  // 2. Update Solutions Slider Text
   const sliderTextEl = document.getElementById('slider-inattention-text');
   if (sliderTextEl) {
     sliderTextEl.textContent = `${formattedCount}+ INATTENTION`;
   }
 
-  // 3. Smoothly animate Column 2 slider handle position
+  // 3. Smoothly animate Solutions Slider Handle
   const sliderHandle = document.getElementById('redesign-slider-handle');
   if (sliderHandle) {
     const maxVolume = 25000;
@@ -248,7 +248,7 @@ function updateInsightSection(kpi) {
   const preventionCalcEl = document.getElementById('solution-prevention-calc');
   if (preventionCalcEl) {
     const estimatedPrevented = Math.round(count * 0.70).toLocaleString();
-    preventionCalcEl.innerHTML = `🛡️ <strong>Estimated Impact:</strong> Potential to prevent up to <span style="color:#059669; font-size:0.85rem;">${estimatedPrevented}</span> crashes through infrastructure (70% target).`;
+    preventionCalcEl.innerHTML = `🛡️ <strong>Estimated Impact:</strong> Potential to prevent up to <span style="color:#059669; font-size:0.9rem;">${estimatedPrevented}</span> crashes through infrastructure (70% target).`;
   }
 }
 
@@ -262,7 +262,6 @@ function renderHeroChart(metricsA, metricsB, isCompareMode) {
 
   const combinedTotalA = (metricsA.alcohol_count || 0) + (metricsA.phone_count || 0);
 
-  // Default Standard View (Dataset A Only)
   let chartDatasets = [
     {
       label: 'Dataset A: Inattention',
@@ -290,7 +289,6 @@ function renderHeroChart(metricsA, metricsB, isCompareMode) {
     }
   ];
 
-  // If Compare Mode is Active: Append Dataset B Stacked Bars
   if (isCompareMode && metricsB) {
     chartDatasets.push(
       {
@@ -396,14 +394,14 @@ function renderBudgetChart(metrics) {
         data: [metrics.enforceable, metrics.infrastructure_bound],
         backgroundColor: ['#475569', '#10b981'],
         borderRadius: 4,
-        barThickness: 45
+        barThickness: 50
       }]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
       layout: {
-        padding: { top: 25 }
+        padding: { top: 30 }
       },
       plugins: {
         legend: { display: false },
@@ -412,7 +410,7 @@ function renderBudgetChart(metrics) {
           anchor: 'end',
           align: 'top',
           color: '#0f172a',
-          font: { family: 'Oswald', size: 12, weight: 'bold' },
+          font: { family: 'Oswald', size: 13, weight: 'bold' },
           formatter: function(value) {
             return value.toLocaleString();
           }
@@ -420,7 +418,7 @@ function renderBudgetChart(metrics) {
       },
       scales: {
         x: {
-          ticks: { color: '#0f172a', font: { family: 'Oswald', size: 10 } },
+          ticks: { color: '#0f172a', font: { family: 'Oswald', size: 11 } },
           grid: { display: false }
         },
         y: {
@@ -456,7 +454,6 @@ function drawMapMarkers(pointsToDraw, borough) {
   const centerConfig = BOROUGH_CENTERS[borough.toUpperCase()] || BOROUGH_CENTERS['ALL'];
   mapInstance.setView([centerConfig[0], centerConfig[1]], centerConfig[2]);
 
-  // Update dynamic count badge in map header
   const countBadgeEl = document.getElementById('map-cluster-count');
   if (countBadgeEl) {
     const boroughLabel = borough === 'ALL' ? 'NYC' : borough;
@@ -464,16 +461,16 @@ function drawMapMarkers(pointsToDraw, borough) {
   }
 
   pointsToDraw.forEach(pt => {
-    let color = '#ef4444'; // Red for Driver/General
+    let color = '#ef4444';
     let badgeBg = '#fef2f2';
     let badgeText = '#dc2626';
 
     if (pt.user_type.includes('Pedestrian')) {
-      color = '#38bdf8'; // Blue for Pedestrian
+      color = '#38bdf8';
       badgeBg = '#f0f9ff';
       badgeText = '#0284c7';
     } else if (pt.user_type.includes('Cyclist')) {
-      color = '#10b981'; // Green for Cyclist
+      color = '#10b981';
       badgeBg = '#ecfdf5';
       badgeText = '#059669';
     }
@@ -487,7 +484,6 @@ function drawMapMarkers(pointsToDraw, borough) {
       fillOpacity: 0.75
     });
 
-    // Custom Styled Popup Card
     circle.bindPopup(`
       <div style="font-family: 'Roboto', sans-serif; padding: 0.2rem; color: #0f172a; line-height: 1.45;">
         <div style="background:${badgeBg}; color:${badgeText}; font-weight:700; font-size:0.75rem; padding:0.25rem 0.5rem; border-radius:4px; display:inline-block; margin-bottom:0.4rem; text-transform:uppercase;">
