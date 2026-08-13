@@ -21,6 +21,7 @@ const BOROUGH_CENTERS = {
 document.addEventListener('DOMContentLoaded', () => {
   initMapIfNeeded();
   fetchAndRenderDashboard();
+  initNavObserver(); // Activate Navbar Link Observer
 
   const updateBtn = document.getElementById('update-btn');
   if (updateBtn) {
@@ -55,6 +56,46 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
+/* =========================================================
+   NAVBAR ACTIVE LINK & SCROLL OBSERVER
+========================================================= */
+function initNavObserver() {
+  const navLinks = document.querySelectorAll('.nav-links a');
+  const sections = document.querySelectorAll('section');
+
+  // 1. Click Listener
+  navLinks.forEach(link => {
+    link.addEventListener('click', function () {
+      navLinks.forEach(nav => nav.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+
+  // 2. Scroll Observer to automatically switch active nav links
+  const observerOptions = {
+    root: null,
+    rootMargin: '-20% 0px -60% 0px',
+    threshold: 0
+  };
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.getAttribute('id');
+        navLinks.forEach(link => {
+          if (link.getAttribute('href') === `#${id}`) {
+            link.classList.add('active');
+          } else {
+            link.classList.remove('active');
+          }
+        });
+      }
+    });
+  }, observerOptions);
+
+  sections.forEach(sec => observer.observe(sec));
+}
+
 async function fetchAndRenderDashboard() {
   const boroughSelect = document.getElementById('borough-select');
   const yearSelect = document.getElementById('year-select');
@@ -69,12 +110,10 @@ async function fetchAndRenderDashboard() {
   showLoadingState(true);
 
   try {
-    // Dataset A Queries
     const kpiPromiseA = fetch(`/api/kpi?borough=${boroughA}&year=${yearA}`).then(res => res.json());
     const chartPromiseA = fetch(`/api/collisions/comparison?borough=${boroughA}&year=${yearA}`).then(res => res.json());
     const mapPromiseA = fetch(`/api/map?borough=${boroughA}&year=${yearA}`).then(res => res.json());
 
-    // Dataset B Queries (if Compare Mode enabled)
     let chartPromiseB = Promise.resolve(null);
     if (isCompareMode) {
       const boroughSelectB = document.getElementById('borough-select-b');
@@ -184,7 +223,7 @@ function showLoadingState(isLoading) {
 
 function showEmptyState() {
   const inattentionEl = document.getElementById('kpi-inattention');
-  if (inattentionEl) inattentionEl.textContent = '0';
+  if (inattentionEl) inattentionEl.textContent = '0 annual collisions';
 
   const sliderTextEl = document.getElementById('slider-inattention-text');
   if (sliderTextEl) sliderTextEl.textContent = '0 INATTENTION';
@@ -209,19 +248,16 @@ function updateInsightSection(kpi) {
   const count = kpi.infrastructure_count || 0;
   const formattedCount = count.toLocaleString();
 
-  // 1. Update Core Insight Banner Count
   const inattentionEl = document.getElementById('kpi-inattention');
   if (inattentionEl) {
     inattentionEl.textContent = `${formattedCount}+ annual collisions`;
   }
 
-  // 2. Update Solutions Slider Text
   const sliderTextEl = document.getElementById('slider-inattention-text');
   if (sliderTextEl) {
     sliderTextEl.textContent = `${formattedCount}+ INATTENTION`;
   }
 
-  // 3. Smoothly animate Solutions Slider Handle
   const sliderHandle = document.getElementById('redesign-slider-handle');
   if (sliderHandle) {
     const maxVolume = 25000;
@@ -230,7 +266,6 @@ function updateInsightSection(kpi) {
     sliderHandle.style.left = `${offset}%`;
   }
 
-  // 4. Dynamic Scope Title & Description
   const scopeTitleEl = document.getElementById('solution-scope-title');
   const scopeDescEl = document.getElementById('solution-scope-desc');
 
@@ -244,7 +279,6 @@ function updateInsightSection(kpi) {
     }
   }
 
-  // 5. LIVE CALCULATOR: Estimated Collisions Prevented (70% Reduction Target)
   const preventionCalcEl = document.getElementById('solution-prevention-calc');
   if (preventionCalcEl) {
     const estimatedPrevented = Math.round(count * 0.70).toLocaleString();

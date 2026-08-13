@@ -42,6 +42,11 @@
       box-shadow: 0 20px 40px rgba(0,0,0,0.5);
     }
 
+    /* GLOBAL FIX: Ensure anchor scrolling stops below the sticky navbar height */
+    section {
+      scroll-margin-top: 70px;
+    }
+
     /* Top Navigation Bar */
     nav {
       background: #18334a;
@@ -83,7 +88,9 @@
       letter-spacing: 0.05em;
       text-transform: uppercase;
       font-weight: 600;
-      transition: color 0.2s;
+      transition: color 0.2s, border-color 0.2s;
+      border-bottom: 2px solid transparent;
+      padding-bottom: 0.2rem;
     }
 
     .nav-links a.active, .nav-links a:hover {
@@ -620,7 +627,6 @@
     <section class="solutions-section-block" id="solutions-section">
       <div class="section-title">Pillar 2: Solutions & Engineering Fixes</div>
       <div class="solutions-grid">
-        <!-- Explanatory Copy -->
         <div>
           <h3 style="font-family:'Oswald', sans-serif; font-size:1.4rem; color:#0f172a; margin-bottom:0.75rem;">
             Engineering Self-Enforcing Streets
@@ -635,7 +641,6 @@
           </ul>
         </div>
 
-        <!-- Before/After & Slider Visual Box -->
         <div class="redesign-visual">
           <div class="before-after-box">
             <div class="road-pane">
@@ -659,7 +664,6 @@
             <span style="color:#10b981;">ALL-USER SAFETY TARGET (0)</span>
           </div>
 
-          <!-- Scope & Live Impact Calculator Box -->
           <div style="margin-top:1rem; padding:0.75rem; background:#ffffff; border-radius:4px; border:1px solid #cbd5e1; font-size:0.8rem; color:#334155; text-align:left;">
             <strong id="solution-scope-title" style="color:#0f172a; font-size:0.85rem;">Scope: City-Wide Corridor Overhauls</strong>
             <p id="solution-scope-desc" style="margin-top:0.3rem; line-height:1.45; color:#475569;">
@@ -717,7 +721,6 @@
           </div>
         </div>
 
-        <!-- Budget Bar Chart -->
         <div class="budget-chart-container">
           <canvas id="budgetChart"></canvas>
         </div>
