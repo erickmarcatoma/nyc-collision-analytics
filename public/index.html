@@ -361,8 +361,25 @@
     }
 
     .budget-chart-container {
-      height: 180px;
+      height: 175px;
       position: relative;
+    }
+
+    /* Ratio Pill Badge for Column 3 */
+    .ratio-pill-badge {
+      display: inline-block;
+      background: rgba(16, 185, 129, 0.12);
+      color: #047857;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.3rem 0.6rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.6rem;
+      text-align: center;
     }
 
     /* Spatial Heatmap Section */
@@ -485,7 +502,6 @@
       <div>
         <label for="year-select">Year Window:</label>
         <select id="year-select">
-          <option value="ALL">All Available Years (2012–Present)</option>
           <option value="2026">2026 (YTD)</option>
           <option value="2025" selected>2025 (Full Year Baseline)</option>
           <option value="2024">2024</option>
@@ -572,12 +588,23 @@
         </div>
       </div>
 
-      <!-- Col 3: Budget Reallocation -->
+      <!-- Col 3: Budget Reallocation (ENHANCED) -->
       <div class="showcase-col" id="budget-section">
         <div class="col-title">Budget Reallocation</div>
+        
+        <!-- Live Allocation Ratio Pill Badge -->
+        <div class="ratio-pill-badge" id="budget-ratio-badge">
+          RECOMMENDED CAPITAL ALLOCATION: 15.3x TO REDESIGN
+        </div>
+
         <div class="budget-chart-container">
           <canvas id="budgetChart"></canvas>
         </div>
+
+        <!-- ROI Callout Footnote -->
+        <p class="insight-text" style="font-size:0.75rem; margin-top:0.5rem; color:#64748b; line-height:1.4;">
+          <strong>Capital ROI:</strong> Permanent street redesign delivers 24/7 continuous crash prevention, outperforming temporary enforcement details.
+        </p>
       </div>
     </section>
 

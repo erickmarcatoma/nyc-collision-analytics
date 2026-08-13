@@ -284,13 +284,23 @@ function renderBudgetChart(metrics) {
 
   if (budgetChart) budgetChart.destroy();
 
+  // Dynamic Ratio Calculation for Column 3 Pill Badge
+  const enforcementVal = metrics.enforceable || 1;
+  const redesignVal = metrics.infrastructure_bound || 0;
+  const ratioMultiple = (redesignVal / enforcementVal).toFixed(1);
+
+  const ratioBadge = document.getElementById('budget-ratio-badge');
+  if (ratioBadge) {
+    ratioBadge.textContent = `RECOMMENDED CAPITAL ALLOCATION: ${ratioMultiple}x TO REDESIGN`;
+  }
+
   budgetChart = new Chart(ctx, {
     type: 'bar',
     data: {
       labels: ['ENFORCEMENT', 'STREET REDESIGN'],
       datasets: [{
         data: [metrics.enforceable, metrics.infrastructure_bound],
-        backgroundColor: ['#475569', '#6ee7b7'],
+        backgroundColor: ['#475569', '#10b981'],
         borderRadius: 4,
         barThickness: 45
       }]
