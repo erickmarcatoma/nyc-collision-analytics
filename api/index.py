@@ -165,7 +165,7 @@ def get_collision_comparison():
 
 
 # =========================================================
-# PART C: SPATIAL MAP COORDINATES ENDPOINT (ALL ROAD USERS)
+# PART C: SPATIAL MAP COORDINATES ENDPOINT
 # =========================================================
 @app.route("/api/map", methods=["GET", "OPTIONS"])
 def get_map_coordinates():

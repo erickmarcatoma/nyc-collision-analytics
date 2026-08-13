@@ -172,16 +172,28 @@ function showErrorState() {
    DASHBOARD COMPONENT RENDERERS
 ========================================================= */
 function updateInsightSection(kpi) {
-  const formattedCount = kpi.infrastructure_count ? kpi.infrastructure_count.toLocaleString() : '0';
+  const count = kpi.infrastructure_count || 0;
+  const formattedCount = count.toLocaleString();
 
+  // 1. Update Col 1 Big Number
   const inattentionEl = document.getElementById('kpi-inattention');
   if (inattentionEl) {
     inattentionEl.textContent = `${formattedCount}+`;
   }
 
+  // 2. Update Col 2 Red text under the slider
   const sliderTextEl = document.getElementById('slider-inattention-text');
   if (sliderTextEl) {
     sliderTextEl.textContent = `${formattedCount}+ INATTENTION`;
+  }
+
+  // 3. Smoothly animate Column 2 slider handle position
+  const sliderHandle = document.getElementById('redesign-slider-handle');
+  if (sliderHandle) {
+    const maxVolume = 25000;
+    const offset = Math.max(10, Math.min(85, 100 - (count / maxVolume * 75)));
+    sliderHandle.style.transition = 'left 0.6s ease-in-out';
+    sliderHandle.style.left = `${offset}%`;
   }
 }
 
