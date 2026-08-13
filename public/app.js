@@ -230,18 +230,25 @@ function updateInsightSection(kpi) {
     sliderHandle.style.left = `${offset}%`;
   }
 
-  // 4. Dynamic Solutions Scope update based on crash volume
+  // 4. Dynamic Scope Title & Description
   const scopeTitleEl = document.getElementById('solution-scope-title');
   const scopeDescEl = document.getElementById('solution-scope-desc');
 
   if (scopeTitleEl && scopeDescEl) {
     if (count > 10000) {
       scopeTitleEl.textContent = "Scope: City-Wide Corridor Overhauls";
-      scopeDescEl.innerHTML = `High annual crash volume requires systemic road diets and concrete pedestrian medians across main arterial avenues. Physical redesigns reduce conflict points by up to <strong>70%</strong>.`;
+      scopeDescEl.textContent = "High annual crash volume requires systemic road diets and concrete pedestrian medians across main arterial avenues.";
     } else {
       scopeTitleEl.textContent = "Scope: Targeted Intersection Hardening";
-      scopeDescEl.innerHTML = `Moderate crash volume calls for localized daylighting, corner bulb-outs, and hardened left-turn bays at high-injury hotspots. Physical redesigns reduce conflict points by up to <strong>70%</strong>.`;
+      scopeDescEl.textContent = "Moderate crash volume calls for localized daylighting, corner bulb-outs, and hardened left-turn bays at high-injury hotspots.";
     }
+  }
+
+  // 5. LIVE CALCULATOR: Estimated Collisions Prevented (70% Reduction Target)
+  const preventionCalcEl = document.getElementById('solution-prevention-calc');
+  if (preventionCalcEl) {
+    const estimatedPrevented = Math.round(count * 0.70).toLocaleString();
+    preventionCalcEl.innerHTML = `🛡️ <strong>Estimated Impact:</strong> Potential to prevent up to <span style="color:#059669; font-size:0.85rem;">${estimatedPrevented}</span> crashes through infrastructure (70% target).`;
   }
 }
 
@@ -289,7 +296,7 @@ function renderHeroChart(metricsA, metricsB, isCompareMode) {
       {
         label: 'Dataset B: Inattention',
         data: [metricsB.infrastructure_bound, 0],
-        backgroundColor: '#f59e0b', // Amber/Gold for Dataset B
+        backgroundColor: '#f59e0b',
         borderRadius: 4,
         barThickness: 40,
         stack: 'stackB'
