@@ -205,16 +205,36 @@
       color: #1a232a;
     }
 
-    /* Filter Strip */
+    /* Filter Strip with Compare Toggle Controls */
     .filter-strip {
       background: #182026;
-      padding: 0.75rem 2rem;
+      padding: 0.85rem 2rem;
       display: flex;
-      gap: 1.5rem;
-      align-items: center;
+      flex-direction: column;
+      gap: 0.85rem;
       border-top: 1px solid #2e3a46;
       border-bottom: 1px solid #2e3a46;
     }
+
+    .filter-row {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .filter-group-label {
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .label-set-a { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
+    .label-set-b { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3); }
 
     .filter-strip label {
       font-family: 'Oswald', sans-serif;
@@ -231,6 +251,23 @@
       padding: 0.4rem 0.8rem;
       border-radius: 4px;
       font-size: 0.85rem;
+    }
+
+    /* Compare Mode Toggle Switch Styling */
+    .compare-toggle-box {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: rgba(255,255,255,0.05);
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      border: 1px solid #3a4856;
+      cursor: pointer;
+    }
+
+    .compare-toggle-box input {
+      cursor: pointer;
+      accent-color: #f59e0b;
     }
 
     /* Bottom Showcase Section */
@@ -485,32 +522,74 @@
       </ul>
     </nav>
 
-    <!-- Filter Strip -->
+    <!-- Filter Strip with Dynamic Compare Controls -->
     <div class="filter-strip">
-      <div>
-        <label for="borough-select">Borough:</label>
-        <select id="borough-select">
-          <option value="ALL">All NYC Boroughs</option>
-          <option value="BROOKLYN">Brooklyn</option>
-          <option value="MANHATTAN">Manhattan</option>
-          <option value="QUEENS">Queens</option>
-          <option value="BRONX">Bronx</option>
-          <option value="STATEN ISLAND">Staten Island</option>
-        </select>
+      <!-- Primary Controls (Dataset A) -->
+      <div class="filter-row">
+        <span class="filter-group-label label-set-a">DATASET A</span>
+        <div>
+          <label for="borough-select">Borough:</label>
+          <select id="borough-select">
+            <option value="ALL">All NYC Boroughs</option>
+            <option value="BROOKLYN">Brooklyn</option>
+            <option value="MANHATTAN">Manhattan</option>
+            <option value="QUEENS">Queens</option>
+            <option value="BRONX">Bronx</option>
+            <option value="STATEN ISLAND">Staten Island</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="year-select">Year Window:</label>
+          <select id="year-select">
+            <option value="ALL">All Available Years (2012–Present)</option>
+            <option value="2026">2026 (YTD)</option>
+            <option value="2025" selected>2025 (Full Year Baseline)</option>
+            <option value="2024">2024</option>
+            <option value="2023">2023</option>
+            <option value="2022">2022</option>
+            <option value="2021">2021</option>
+            <option value="2020">2020</option>
+            <option value="2019">2019 (Pre-Pandemic Baseline)</option>
+          </select>
+        </div>
+
+        <!-- Compare Mode Toggle -->
+        <label class="compare-toggle-box" for="compare-toggle">
+          <input type="checkbox" id="compare-toggle">
+          <span style="font-family:'Oswald', sans-serif; font-size:0.8rem; color:#f59e0b; font-weight:700;">ENABLE COMPARISON MODE</span>
+        </label>
       </div>
 
-      <div>
-        <label for="year-select">Year Window:</label>
-        <select id="year-select">
-          <option value="2026">2026 (YTD)</option>
-          <option value="2025" selected>2025 (Full Year Baseline)</option>
-          <option value="2024">2024</option>
-          <option value="2023">2023</option>
-          <option value="2022">2022</option>
-          <option value="2021">2021</option>
-          <option value="2020">2020</option>
-          <option value="2019">2019 (Pre-Pandemic Baseline)</option>
-        </select>
+      <!-- Secondary Controls (Dataset B - Hidden by Default) -->
+      <div class="filter-row" id="compare-controls-row" style="display: none; border-top: 1px dashed #3a4856; padding-top: 0.6rem;">
+        <span class="filter-group-label label-set-b">DATASET B (COMPARE)</span>
+        <div>
+          <label for="borough-select-b">Borough B:</label>
+          <select id="borough-select-b">
+            <option value="ALL">All NYC Boroughs</option>
+            <option value="BROOKLYN">Brooklyn</option>
+            <option value="MANHATTAN" selected>Manhattan</option>
+            <option value="QUEENS">Queens</option>
+            <option value="BRONX">Bronx</option>
+            <option value="STATEN ISLAND">Staten Island</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="year-select-b">Year Window B:</label>
+          <select id="year-select-b">
+            <option value="ALL">All Available Years (2012–Present)</option>
+            <option value="2026">2026 (YTD)</option>
+            <option value="2025">2025</option>
+            <option value="2024">2024</option>
+            <option value="2023">2023</option>
+            <option value="2022">2022</option>
+            <option value="2021" selected>2021</option>
+            <option value="2020">2020</option>
+            <option value="2019">2019</option>
+          </select>
+        </div>
       </div>
     </div>
 
@@ -588,7 +667,7 @@
         </div>
       </div>
 
-      <!-- Col 3: Budget Reallocation (ENHANCED) -->
+      <!-- Col 3: Budget Reallocation -->
       <div class="showcase-col" id="budget-section">
         <div class="col-title">Budget Reallocation</div>
         

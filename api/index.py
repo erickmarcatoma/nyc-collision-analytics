@@ -21,9 +21,6 @@ def build_date_where_clause(year):
     return f"crash_date >= '{year}-01-01T00:00:00' AND crash_date <= '{year}-12-31T23:59:59'"
 
 
-# =========================================================
-# PART A: EXECUTIVE KPI SUMMARY
-# =========================================================
 @app.route("/api/kpi", methods=["GET", "OPTIONS"])
 def get_kpi_summary():
     if request.method == "OPTIONS":
@@ -41,12 +38,11 @@ def get_kpi_summary():
     params = {
         "$where": where_clause,
         "$limit": 50000,
-        "$select": "contributing_factor_vehicle_1, number_of_pedestrians_injured, number_of_cyclist_injured, number_of_motorist_injured",
+        "$select": "contributing_factor_vehicle_1",
     }
 
     try:
         response = requests.get(NYC_DATA_API_URL, params=params, timeout=12)
-
         if response.status_code != 200:
             return jsonify({"success": False, "error": f"API HTTP {response.status_code}"}), 200
 
@@ -102,9 +98,6 @@ def get_kpi_summary():
         return jsonify({"success": False, "error": str(e)}), 200
 
 
-# =========================================================
-# PART B: COMPARISON ENDPOINT
-# =========================================================
 @app.route("/api/collisions/comparison", methods=["GET", "OPTIONS"])
 def get_collision_comparison():
     if request.method == "OPTIONS":
@@ -164,9 +157,6 @@ def get_collision_comparison():
         return jsonify({"success": False, "error": str(e)}), 200
 
 
-# =========================================================
-# PART C: SPATIAL MAP COORDINATES ENDPOINT
-# =========================================================
 @app.route("/api/map", methods=["GET", "OPTIONS"])
 def get_map_coordinates():
     if request.method == "OPTIONS":

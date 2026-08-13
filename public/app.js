@@ -27,52 +27,86 @@ document.addEventListener('DOMContentLoaded', () => {
     updateBtn.addEventListener('click', fetchAndRenderDashboard);
   }
 
+  // Primary Dropdown Listeners
   const boroughSelect = document.getElementById('borough-select');
   const yearSelect = document.getElementById('year-select');
 
-  if (boroughSelect) {
-    boroughSelect.addEventListener('change', fetchAndRenderDashboard);
-  }
-  if (yearSelect) {
-    yearSelect.addEventListener('change', fetchAndRenderDashboard);
+  if (boroughSelect) boroughSelect.addEventListener('change', fetchAndRenderDashboard);
+  if (yearSelect) yearSelect.addEventListener('change', fetchAndRenderDashboard);
+
+  // Secondary Dropdown Listeners (Dataset B)
+  const boroughSelectB = document.getElementById('borough-select-b');
+  const yearSelectB = document.getElementById('year-select-b');
+
+  if (boroughSelectB) boroughSelectB.addEventListener('change', fetchAndRenderDashboard);
+  if (yearSelectB) yearSelectB.addEventListener('change', fetchAndRenderDashboard);
+
+  // Compare Toggle Listener
+  const compareToggle = document.getElementById('compare-toggle');
+  const compareControlsRow = document.getElementById('compare-controls-row');
+
+  if (compareToggle) {
+    compareToggle.addEventListener('change', () => {
+      if (compareControlsRow) {
+        compareControlsRow.style.display = compareToggle.checked ? 'flex' : 'none';
+      }
+      fetchAndRenderDashboard();
+    });
   }
 });
 
 async function fetchAndRenderDashboard() {
   const boroughSelect = document.getElementById('borough-select');
   const yearSelect = document.getElementById('year-select');
+  const compareToggle = document.getElementById('compare-toggle');
 
   if (!boroughSelect || !yearSelect) return;
 
-  const borough = boroughSelect.value;
-  const year = yearSelect.value;
+  const boroughA = boroughSelect.value;
+  const yearA = yearSelect.value;
+  const isCompareMode = compareToggle ? compareToggle.checked : false;
 
   showLoadingState(true);
 
   try {
-    const kpiPromise = fetch(`/api/kpi?borough=${borough}&year=${year}`).then(res => res.json());
-    const chartPromise = fetch(`/api/collisions/comparison?borough=${borough}&year=${year}`).then(res => res.json());
-    const mapPromise = fetch(`/api/map?borough=${borough}&year=${year}`).then(res => res.json());
+    // Dataset A Queries
+    const kpiPromiseA = fetch(`/api/kpi?borough=${boroughA}&year=${yearA}`).then(res => res.json());
+    const chartPromiseA = fetch(`/api/collisions/comparison?borough=${boroughA}&year=${yearA}`).then(res => res.json());
+    const mapPromiseA = fetch(`/api/map?borough=${boroughA}&year=${yearA}`).then(res => res.json());
 
-    const [kpiResult, chartResult, mapResult] = await Promise.all([kpiPromise, chartPromise, mapPromise]);
+    // Dataset B Queries (if Compare Mode enabled)
+    let chartPromiseB = Promise.resolve(null);
+    if (isCompareMode) {
+      const boroughSelectB = document.getElementById('borough-select-b');
+      const yearSelectB = document.getElementById('year-select-b');
+      const boroughB = boroughSelectB ? boroughSelectB.value : 'MANHATTAN';
+      const yearB = yearSelectB ? yearSelectB.value : '2021';
 
-    if (kpiResult.success && kpiResult.kpi.total_volume === 0) {
+      chartPromiseB = fetch(`/api/collisions/comparison?borough=${boroughB}&year=${yearB}`).then(res => res.json());
+    }
+
+    const [kpiResultA, chartResultA, mapResultA, chartResultB] = await Promise.all([
+      kpiPromiseA, chartPromiseA, mapPromiseA, chartPromiseB
+    ]);
+
+    if (kpiResultA.success && kpiResultA.kpi.total_volume === 0) {
       showEmptyState();
       return;
     }
 
-    if (kpiResult.success) {
-      updateInsightSection(kpiResult.kpi);
+    if (kpiResultA.success) {
+      updateInsightSection(kpiResultA.kpi);
     }
 
-    if (chartResult.success) {
-      renderHeroChart(chartResult.metrics);
-      renderBudgetChart(chartResult.metrics);
+    if (chartResultA.success) {
+      const metricsB = (chartResultB && chartResultB.success) ? chartResultB.metrics : null;
+      renderHeroChart(chartResultA.metrics, metricsB, isCompareMode);
+      renderBudgetChart(chartResultA.metrics);
     }
 
-    if (mapResult.success) {
-      currentMapPoints = mapResult.points;
-      renderMapPoints(currentMapPoints, borough);
+    if (mapResultA.success) {
+      currentMapPoints = mapResultA.points;
+      renderMapPoints(currentMapPoints, boroughA);
       resetMapFilterButtons();
     }
 
@@ -175,19 +209,16 @@ function updateInsightSection(kpi) {
   const count = kpi.infrastructure_count || 0;
   const formattedCount = count.toLocaleString();
 
-  // 1. Update Col 1 Big Number
   const inattentionEl = document.getElementById('kpi-inattention');
   if (inattentionEl) {
     inattentionEl.textContent = `${formattedCount}+`;
   }
 
-  // 2. Update Col 2 Red text under the slider
   const sliderTextEl = document.getElementById('slider-inattention-text');
   if (sliderTextEl) {
     sliderTextEl.textContent = `${formattedCount}+ INATTENTION`;
   }
 
-  // 3. Smoothly animate Column 2 slider handle position
   const sliderHandle = document.getElementById('redesign-slider-handle');
   if (sliderHandle) {
     const maxVolume = 25000;
@@ -197,46 +228,83 @@ function updateInsightSection(kpi) {
   }
 }
 
-function renderHeroChart(metrics) {
+function renderHeroChart(metricsA, metricsB, isCompareMode) {
   const ctx = document.getElementById('heroChart').getContext('2d');
-  const yearSelect = document.getElementById('year-select');
-  const selectedYear = yearSelect ? yearSelect.value : '2025';
+  
+  const yearSelectA = document.getElementById('year-select');
+  const boroughSelectA = document.getElementById('borough-select');
+  const selectedYearA = yearSelectA ? yearSelectA.value : '2025';
+  const selectedBoroughA = boroughSelectA ? boroughSelectA.value : 'ALL';
 
   if (heroChart) heroChart.destroy();
 
-  const periodLabel = selectedYear === '2026' ? 'YTD COLLISIONS' : 'ANNUAL COLLISIONS';
-  const combinedTotal = (metrics.alcohol_count || 0) + (metrics.phone_count || 0);
+  const combinedTotalA = (metricsA.alcohol_count || 0) + (metricsA.phone_count || 0);
+
+  // Default Standard View (Dataset A Only)
+  let chartDatasets = [
+    {
+      label: 'Dataset A: Inattention',
+      data: [metricsA.infrastructure_bound, 0],
+      backgroundColor: '#ef4444',
+      borderRadius: 4,
+      barThickness: isCompareMode ? 40 : 65,
+      stack: 'stackA'
+    },
+    {
+      label: 'Dataset A: Cell Phone Use',
+      data: [0, metricsA.phone_count || 0],
+      backgroundColor: '#38bdf8',
+      borderRadius: 4,
+      barThickness: isCompareMode ? 40 : 65,
+      stack: 'stackA'
+    },
+    {
+      label: 'Dataset A: Alcohol Involvement',
+      data: [0, metricsA.alcohol_count || 0],
+      backgroundColor: '#a855f7',
+      borderRadius: 4,
+      barThickness: isCompareMode ? 40 : 65,
+      stack: 'stackA'
+    }
+  ];
+
+  // If Compare Mode is Active: Append Dataset B Stacked Bars
+  if (isCompareMode && metricsB) {
+    const combinedTotalB = (metricsB.alcohol_count || 0) + (metricsB.phone_count || 0);
+
+    chartDatasets.push(
+      {
+        label: 'Dataset B: Inattention',
+        data: [metricsB.infrastructure_bound, 0],
+        backgroundColor: '#f59e0b', // Amber/Gold for Dataset B
+        borderRadius: 4,
+        barThickness: 40,
+        stack: 'stackB'
+      },
+      {
+        label: 'Dataset B: Phone Use',
+        data: [0, metricsB.phone_count || 0],
+        backgroundColor: '#fbbf24',
+        borderRadius: 4,
+        barThickness: 40,
+        stack: 'stackB'
+      },
+      {
+        label: 'Dataset B: Alcohol',
+        data: [0, metricsB.alcohol_count || 0],
+        backgroundColor: '#d97706',
+        borderRadius: 4,
+        barThickness: 40,
+        stack: 'stackB'
+      }
+    );
+  }
 
   heroChart = new Chart(ctx, {
     type: 'bar',
     data: {
       labels: ['DRIVER INATTENTION', 'ALCOHOL + PHONE USE'],
-      datasets: [
-        {
-          label: 'Inattention',
-          data: [metrics.infrastructure_bound, 0],
-          backgroundColor: '#ef4444',
-          borderRadius: 4,
-          barThickness: 65,
-          stack: 'stack1'
-        },
-        {
-          label: 'Cell Phone Use',
-          data: [0, metrics.phone_count || 0],
-          backgroundColor: '#38bdf8',
-          borderRadius: 4,
-          barThickness: 65,
-          stack: 'stack1'
-        },
-        {
-          label: 'Alcohol Involvement',
-          data: [0, metrics.alcohol_count || 0],
-          backgroundColor: '#a855f7',
-          borderRadius: 4,
-          barThickness: 65,
-          stack: 'stack1'
-        }
-      ]
+      datasets: chartDatasets
     },
     options: {
       responsive: true,
@@ -251,13 +319,22 @@ function renderHeroChart(metrics) {
           align: 'top',
           offset: 4,
           color: '#ffffff',
-          font: { family: 'Oswald', size: 13, weight: 'bold' },
+          font: { family: 'Oswald', size: 12, weight: 'bold' },
           formatter: function(value, ctx) {
+            // Label Dataset A
             if (ctx.datasetIndex === 0 && ctx.dataIndex === 0) {
-              return `${value.toLocaleString()}\n${periodLabel}`;
+              return isCompareMode ? `[A] ${value.toLocaleString()}` : `${value.toLocaleString()}\n${selectedYearA === '2026' ? 'YTD' : 'ANNUAL'}`;
             }
             if (ctx.datasetIndex === 2 && ctx.dataIndex === 1) {
-              return `COMBINED\n< ${combinedTotal.toLocaleString()}\nCOLLISIONS`;
+              return isCompareMode ? `[A] < ${combinedTotalA.toLocaleString()}` : `COMBINED\n< ${combinedTotalA.toLocaleString()}\nCOLLISIONS`;
+            }
+            // Label Dataset B (When Compare Mode Enabled)
+            if (isCompareMode && ctx.datasetIndex === 3 && ctx.dataIndex === 0) {
+              return `[B] ${value.toLocaleString()}`;
+            }
+            if (isCompareMode && ctx.datasetIndex === 5 && ctx.dataIndex === 1) {
+              const combinedTotalB = (metricsB.alcohol_count || 0) + (metricsB.phone_count || 0);
+              return `[B] < ${combinedTotalB.toLocaleString()}`;
             }
             return '';
           }
@@ -265,12 +342,12 @@ function renderHeroChart(metrics) {
       },
       scales: {
         x: {
-          stacked: true,
+          stacked: false, // Grouped side-by-side stacks
           ticks: { color: '#ffffff', font: { family: 'Oswald', size: 12 } },
           grid: { display: false }
         },
         y: {
-          stacked: true,
+          stacked: false,
           display: false,
           beginAtZero: true
         }
@@ -284,7 +361,6 @@ function renderBudgetChart(metrics) {
 
   if (budgetChart) budgetChart.destroy();
 
-  // Dynamic Ratio Calculation for Column 3 Pill Badge
   const enforcementVal = metrics.enforceable || 1;
   const redesignVal = metrics.infrastructure_bound || 0;
   const ratioMultiple = (redesignVal / enforcementVal).toFixed(1);
