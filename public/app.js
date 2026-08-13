@@ -7,7 +7,7 @@ let budgetChart = null;
 
 let mapInstance = null;
 let mapMarkersLayer = null;
-let currentMapPoints = []; // Stores latest points globally for instant client-side filtering
+let currentMapPoints = []; 
 
 const BOROUGH_CENTERS = {
   'ALL': [40.7128, -74.0060, 11],
@@ -21,28 +21,25 @@ const BOROUGH_CENTERS = {
 document.addEventListener('DOMContentLoaded', () => {
   initMapIfNeeded();
   fetchAndRenderDashboard();
-  initNavObserver(); // Activate Navbar Link Observer
+  initNavObserver();
 
   const updateBtn = document.getElementById('update-btn');
   if (updateBtn) {
     updateBtn.addEventListener('click', fetchAndRenderDashboard);
   }
 
-  // Primary Dropdown Listeners
   const boroughSelect = document.getElementById('borough-select');
   const yearSelect = document.getElementById('year-select');
 
   if (boroughSelect) boroughSelect.addEventListener('change', fetchAndRenderDashboard);
   if (yearSelect) yearSelect.addEventListener('change', fetchAndRenderDashboard);
 
-  // Secondary Dropdown Listeners (Dataset B)
   const boroughSelectB = document.getElementById('borough-select-b');
   const yearSelectB = document.getElementById('year-select-b');
 
   if (boroughSelectB) boroughSelectB.addEventListener('change', fetchAndRenderDashboard);
   if (yearSelectB) yearSelectB.addEventListener('change', fetchAndRenderDashboard);
 
-  // Compare Toggle Listener
   const compareToggle = document.getElementById('compare-toggle');
   const compareControlsRow = document.getElementById('compare-controls-row');
 
@@ -63,7 +60,6 @@ function initNavObserver() {
   const navLinks = document.querySelectorAll('.nav-links a');
   const sections = document.querySelectorAll('section');
 
-  // 1. Click Listener
   navLinks.forEach(link => {
     link.addEventListener('click', function () {
       navLinks.forEach(nav => nav.classList.remove('active'));
@@ -71,7 +67,6 @@ function initNavObserver() {
     });
   });
 
-  // 2. Scroll Observer to automatically switch active nav links
   const observerOptions = {
     root: null,
     rootMargin: '-20% 0px -60% 0px',

@@ -42,7 +42,7 @@
       box-shadow: 0 20px 40px rgba(0,0,0,0.5);
     }
 
-    /* GLOBAL FIX: Ensure anchor scrolling stops below the sticky navbar height */
+    /* GLOBAL FIX: Ensure anchor scrolling stops below sticky navbar height */
     section {
       scroll-margin-top: 70px;
     }
@@ -172,6 +172,7 @@
       margin-bottom: 1.25rem;
       border-bottom: 2px solid #2e3a46;
       padding-bottom: 0.5rem;
+      line-height: 1.2;
     }
 
     /* PILLAR 1: DATA HERO SECTION */
@@ -410,16 +411,16 @@
     .map-header-row {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1.25rem;
+      align-items: flex-start; /* FIX: Prevents text squishing */
+      margin-bottom: 1.5rem;
       flex-wrap: wrap;
-      gap: 0.75rem;
+      gap: 1rem;
     }
 
     .map-section .section-title {
-      border-bottom: none;
-      margin-bottom: 0;
-      padding-bottom: 0;
+      border-bottom: 2px solid #2e3a46; /* FIX: Re-establishes title bottom border */
+      margin-bottom: 0.5rem;
+      padding-bottom: 0.5rem;
     }
 
     .map-btn-filter {
@@ -539,8 +540,8 @@
 
         <div>
           <label for="year-select">Year Window:</label>
+          <!-- REMOVED "ALL AVAILABLE YEARS" FROM DROPDOWN -->
           <select id="year-select">
-            <option value="ALL">All Available Years (2012–Present)</option>
             <option value="2026">2026 (YTD)</option>
             <option value="2025" selected>2025 (Full Year Baseline)</option>
             <option value="2024">2024</option>
@@ -574,6 +575,7 @@
 
         <div>
           <label for="year-select-b">Year Window B:</label>
+          <!-- REMOVED "ALL AVAILABLE YEARS" FROM DROPDOWN B -->
           <select id="year-select-b">
             <option value="2026">2026 (YTD)</option>
             <option value="2025">2025</option>
@@ -615,7 +617,8 @@
       <div class="insight-banner-section">
         <div class="insight-content-box">
           <div class="insight-label">PILLAR 1: THE CORE INSIGHT</div>
-          <h2 class="insight-headline">Driver Inattention Dwarfs Ticketable Offenses</h2>
+          <!-- UPDATED HEADLINE PHRASE -->
+          <h2 class="insight-headline">Distracted Driving Easily Outpaces Traffic Tickets</h2>
           <p class="insight-text-body">
             With over <strong style="color: #ef4444;" id="kpi-inattention">24,000+ annual collisions</strong> tied to cognitive distraction, relying on traffic tickets alone will never reach Vision Zero. True traffic safety requires transforming the physical street environment so momentary driver mistakes aren't fatal.
           </p>
@@ -682,12 +685,12 @@
       <div class="map-header-row">
         <div>
           <div class="section-title">Pillar 3: Policy & Spatial Incident Clusters</div>
-          <div style="font-size:0.82rem; color:#94a3b8; margin-top:0.25rem;" id="map-cluster-count">
-            Showing <strong>500</strong> spatial incident clusters
+          <div style="font-size:0.85rem; color:#94a3b8; margin-top:0.4rem;" id="map-cluster-count">
+            Showing <strong>500</strong> spatial incident clusters in <strong>NYC</strong>
           </div>
         </div>
 
-        <div style="display: flex; gap: 0.5rem;" id="map-filter-group">
+        <div style="display: flex; gap: 0.5rem; margin-top: 0.2rem;" id="map-filter-group">
           <button class="map-btn-filter active-all" id="btn-map-all" onclick="filterMapPoints('ALL')">ALL USERS</button>
           <button class="map-btn-filter" id="btn-map-ped" onclick="filterMapPoints('Pedestrian')">🚸 PEDESTRIANS</button>
           <button class="map-btn-filter" id="btn-map-cyc" onclick="filterMapPoints('Cyclist')">🚲 CYCLISTS</button>
