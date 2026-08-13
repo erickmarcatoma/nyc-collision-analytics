@@ -209,16 +209,19 @@ function updateInsightSection(kpi) {
   const count = kpi.infrastructure_count || 0;
   const formattedCount = count.toLocaleString();
 
+  // 1. Update Col 1 Big Number
   const inattentionEl = document.getElementById('kpi-inattention');
   if (inattentionEl) {
     inattentionEl.textContent = `${formattedCount}+`;
   }
 
+  // 2. Update Col 2 Red text under the slider
   const sliderTextEl = document.getElementById('slider-inattention-text');
   if (sliderTextEl) {
     sliderTextEl.textContent = `${formattedCount}+ INATTENTION`;
   }
 
+  // 3. Smoothly animate Column 2 slider handle position
   const sliderHandle = document.getElementById('redesign-slider-handle');
   if (sliderHandle) {
     const maxVolume = 25000;
@@ -226,15 +229,27 @@ function updateInsightSection(kpi) {
     sliderHandle.style.transition = 'left 0.6s ease-in-out';
     sliderHandle.style.left = `${offset}%`;
   }
+
+  // 4. Dynamic Solutions Scope update based on crash volume
+  const scopeTitleEl = document.getElementById('solution-scope-title');
+  const scopeDescEl = document.getElementById('solution-scope-desc');
+
+  if (scopeTitleEl && scopeDescEl) {
+    if (count > 10000) {
+      scopeTitleEl.textContent = "Scope: City-Wide Corridor Overhauls";
+      scopeDescEl.innerHTML = `High annual crash volume requires systemic road diets and concrete pedestrian medians across main arterial avenues. Physical redesigns reduce conflict points by up to <strong>70%</strong>.`;
+    } else {
+      scopeTitleEl.textContent = "Scope: Targeted Intersection Hardening";
+      scopeDescEl.innerHTML = `Moderate crash volume calls for localized daylighting, corner bulb-outs, and hardened left-turn bays at high-injury hotspots. Physical redesigns reduce conflict points by up to <strong>70%</strong>.`;
+    }
+  }
 }
 
 function renderHeroChart(metricsA, metricsB, isCompareMode) {
   const ctx = document.getElementById('heroChart').getContext('2d');
   
   const yearSelectA = document.getElementById('year-select');
-  const boroughSelectA = document.getElementById('borough-select');
   const selectedYearA = yearSelectA ? yearSelectA.value : '2025';
-  const selectedBoroughA = boroughSelectA ? boroughSelectA.value : 'ALL';
 
   if (heroChart) heroChart.destroy();
 
@@ -270,8 +285,6 @@ function renderHeroChart(metricsA, metricsB, isCompareMode) {
 
   // If Compare Mode is Active: Append Dataset B Stacked Bars
   if (isCompareMode && metricsB) {
-    const combinedTotalB = (metricsB.alcohol_count || 0) + (metricsB.phone_count || 0);
-
     chartDatasets.push(
       {
         label: 'Dataset B: Inattention',
@@ -321,14 +334,12 @@ function renderHeroChart(metricsA, metricsB, isCompareMode) {
           color: '#ffffff',
           font: { family: 'Oswald', size: 12, weight: 'bold' },
           formatter: function(value, ctx) {
-            // Label Dataset A
             if (ctx.datasetIndex === 0 && ctx.dataIndex === 0) {
               return isCompareMode ? `[A] ${value.toLocaleString()}` : `${value.toLocaleString()}\n${selectedYearA === '2026' ? 'YTD' : 'ANNUAL'}`;
             }
             if (ctx.datasetIndex === 2 && ctx.dataIndex === 1) {
               return isCompareMode ? `[A] < ${combinedTotalA.toLocaleString()}` : `COMBINED\n< ${combinedTotalA.toLocaleString()}\nCOLLISIONS`;
             }
-            // Label Dataset B (When Compare Mode Enabled)
             if (isCompareMode && ctx.datasetIndex === 3 && ctx.dataIndex === 0) {
               return `[B] ${value.toLocaleString()}`;
             }
@@ -342,7 +353,7 @@ function renderHeroChart(metricsA, metricsB, isCompareMode) {
       },
       scales: {
         x: {
-          stacked: false, // Grouped side-by-side stacks
+          stacked: false,
           ticks: { color: '#ffffff', font: { family: 'Oswald', size: 12 } },
           grid: { display: false }
         },
