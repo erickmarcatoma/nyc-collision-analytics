@@ -119,7 +119,7 @@ async function fetchAndRenderDashboard() {
 }
 
 /* =========================================================
-   INTERACTIVE MAP FILTER TOGGLES
+   INTERACTIVE MAP FILTER & POLICY RENDERERS
 ========================================================= */
 function filterMapPoints(userCategory) {
   const boroughSelect = document.getElementById('borough-select');
@@ -456,25 +456,49 @@ function drawMapMarkers(pointsToDraw, borough) {
   const centerConfig = BOROUGH_CENTERS[borough.toUpperCase()] || BOROUGH_CENTERS['ALL'];
   mapInstance.setView([centerConfig[0], centerConfig[1]], centerConfig[2]);
 
+  // Update dynamic count badge in map header
+  const countBadgeEl = document.getElementById('map-cluster-count');
+  if (countBadgeEl) {
+    const boroughLabel = borough === 'ALL' ? 'NYC' : borough;
+    countBadgeEl.innerHTML = `Showing <strong>${pointsToDraw.length.toLocaleString()}</strong> spatial incident clusters in <strong>${boroughLabel}</strong>`;
+  }
+
   pointsToDraw.forEach(pt => {
-    let color = '#ef4444';
-    if (pt.user_type.includes('Pedestrian')) color = '#38bdf8';
-    else if (pt.user_type.includes('Cyclist')) color = '#10b981';
+    let color = '#ef4444'; // Red for Driver/General
+    let badgeBg = '#fef2f2';
+    let badgeText = '#dc2626';
+
+    if (pt.user_type.includes('Pedestrian')) {
+      color = '#38bdf8'; // Blue for Pedestrian
+      badgeBg = '#f0f9ff';
+      badgeText = '#0284c7';
+    } else if (pt.user_type.includes('Cyclist')) {
+      color = '#10b981'; // Green for Cyclist
+      badgeBg = '#ecfdf5';
+      badgeText = '#059669';
+    }
 
     const circle = L.circleMarker([pt.lat, pt.lng], {
-      radius: 5,
+      radius: 6,
       fillColor: color,
-      color: '#000000',
-      weight: 1,
-      opacity: 0.8,
-      fillOpacity: 0.7
+      color: '#ffffff',
+      weight: 1.5,
+      opacity: 0.9,
+      fillOpacity: 0.75
     });
 
+    // Custom Styled Popup Card
     circle.bindPopup(`
-      <div style="font-size: 0.85rem; font-family: sans-serif; color: #0f172a; line-height: 1.4;">
-        <strong>Impact:</strong> ${pt.user_type}<br/>
-        <strong>Root Cause:</strong> ${pt.factor}<br/>
-        <strong>Date:</strong> ${pt.date}
+      <div style="font-family: 'Roboto', sans-serif; padding: 0.2rem; color: #0f172a; line-height: 1.45;">
+        <div style="background:${badgeBg}; color:${badgeText}; font-weight:700; font-size:0.75rem; padding:0.25rem 0.5rem; border-radius:4px; display:inline-block; margin-bottom:0.4rem; text-transform:uppercase;">
+          ${pt.user_type}
+        </div>
+        <div style="font-size:0.82rem; margin-bottom:0.2rem;">
+          <strong>Contributing Factor:</strong> ${pt.factor}
+        </div>
+        <div style="font-size:0.75rem; color:#64748b;">
+          📅 Crash Date: ${pt.date}
+        </div>
       </div>
     `);
 

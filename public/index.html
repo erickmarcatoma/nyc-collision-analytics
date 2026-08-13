@@ -695,10 +695,17 @@
       </div>
     </section>
 
-    <!-- Spatial Heatmap Section -->
+    <!-- Spatial Heatmap & Policy Section -->
     <section class="map-section" id="map-section">
       <div class="map-header-row">
-        <div class="col-title">Spatial Incident Clusters (The "Moment" Engine)</div>
+        <div>
+          <div class="col-title">Policy: Spatial Incident Clusters</div>
+          <div style="font-size:0.78rem; color:#94a3b8; margin-top:0.25rem;" id="map-cluster-count">
+            Showing <strong>500</strong> spatial incident clusters
+          </div>
+        </div>
+
+        <!-- Category Filter Buttons -->
         <div style="display: flex; gap: 0.5rem;" id="map-filter-group">
           <button class="map-btn-filter active-all" id="btn-map-all" onclick="filterMapPoints('ALL')">ALL USERS</button>
           <button class="map-btn-filter" id="btn-map-ped" onclick="filterMapPoints('Pedestrian')">🚸 PEDESTRIANS</button>
@@ -706,6 +713,8 @@
           <button class="map-btn-filter" id="btn-map-drv" onclick="filterMapPoints('Driver')">🚘 DRIVERS</button>
         </div>
       </div>
+
+      <!-- Leaflet Map Container -->
       <div id="mapView"></div>
     </section>
 
